@@ -67,6 +67,21 @@ async function getWhatsAppService() {
   return whatsappService;
 }
 
+// Check if WhatsApp module is installed
+let whatsappAvailable: boolean | null = null;
+
+async function checkWhatsAppAvailable(): Promise<boolean> {
+  if (whatsappAvailable !== null) return whatsappAvailable;
+  try {
+    const waPath = '../../../whatsapp/service.js';
+    await import(/* webpackIgnore: true */ waPath);
+    whatsappAvailable = true;
+  } catch {
+    whatsappAvailable = false;
+  }
+  return whatsappAvailable;
+}
+
 // Admin only middleware
 function adminOnly(req: Request, res: Response, next: Function) {
   if (req.user?.role !== 'admin') {
@@ -74,6 +89,12 @@ function adminOnly(req: Request, res: Response, next: Function) {
   }
   next();
 }
+
+// Check if WhatsApp is available (no admin required)
+router.get('/available', async (req: Request, res: Response) => {
+  const available = await checkWhatsAppAvailable();
+  res.json({ available });
+});
 
 // Get WhatsApp status
 router.get('/status', adminOnly, async (req: Request, res: Response) => {

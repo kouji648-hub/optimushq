@@ -145,6 +145,13 @@ Dedicated per-project field for dev server management:
 - bcrypt password hashing with database-persisted auth tokens
 - All 13 API routes scoped by user_id with cross-user access blocked
 
+### WhatsApp Integration (Optional)
+- Chat with agents via WhatsApp on your phone
+- Admin connects WhatsApp via QR code in Settings
+- Users are identified by phone number (must be set in profile)
+- Messages routed to user's account based on registered phone
+- Uses whatsapp-web.js (linked device mode) -- no separate phone server needed
+
 ### Mobile Responsive
 - Collapsible sidebar with hamburger menu on mobile
 - Responsive layouts across all pages
@@ -204,6 +211,18 @@ npx @goranefbl/optimushq
 ```
 
 Opens at `http://localhost:3001`. Login with `admin` / `admin`.
+
+#### Optional: Enable WhatsApp
+
+```bash
+# Install WhatsApp module (downloads Puppeteer, ~300MB)
+npx @goranefbl/optimushq --install-whatsapp
+
+# Or install and start in one command
+npx @goranefbl/optimushq --with-whatsapp
+```
+
+After installing, go to Settings to scan the QR code with WhatsApp.
 
 ### Option 2: Clone and run
 
