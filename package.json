@@ -1,0 +1,49 @@
+{
+  "name": "@goranefbl/optimushq",
+  "version": "1.0.1",
+  "description": "A self-hosted, multi-tenant platform for running multiple Claude Code agents across projects",
+  "bin": {
+    "optimushq": "./bin/cli.js"
+  },
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w client && npm run build -w server",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "claude",
+    "ai",
+    "agent",
+    "multi-agent",
+    "anthropic",
+    "cli",
+    "dashboard"
+  ],
+  "author": "goranefbl",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/goranefbl/optimushq.git"
+  },
+  "homepage": "https://github.com/goranefbl/optimushq",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "bin",
+    "server/dist",
+    "client/dist",
+    "shared"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}

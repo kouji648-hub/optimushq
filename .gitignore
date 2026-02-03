@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.*
+*.log
+
+# PM2 config (contains credentials)
+ecosystem.config.cjs
+
+# Database backups (may contain secrets)
+backups/
+
+# OS
+.DS_Store
+Thumbs.db
+mcp-config.json
+whatsapp/.wwebjs_auth/
+whatsapp/dist/
+whatsapp/node_modules/
