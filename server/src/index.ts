@@ -28,6 +28,92 @@ import sosContactsRouter from './routes/sos-contacts.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 
+// Set up Claude Code hooks for project path validation
+function setupPathValidationHook() {
+  const homeDir = process.env.HOME || '/home/claude';
+  const claudeDir = path.join(homeDir, '.claude');
+  const hooksDir = path.join(claudeDir, 'hooks');
+  const settingsPath = path.join(claudeDir, 'settings.json');
+  const hookPath = path.join(hooksDir, 'validate-path.js');
+
+  // Create directories if needed
+  if (!fs.existsSync(hooksDir)) {
+    fs.mkdirSync(hooksDir, { recursive: true });
+  }
+
+  // Write the hook script
+  const hookScript = `#!/usr/bin/env node
+// Hook script to validate file paths are within PROJECT_PATH
+// Used by OptimusHQ to enforce project isolation
+
+const path = require('path');
+
+const projectPath = process.env.PROJECT_PATH;
+if (!projectPath) process.exit(0);
+
+let input = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => { input += chunk; });
+process.stdin.on('end', () => {
+  try {
+    const data = JSON.parse(input);
+    const tool = data.tool_name || data.tool || '';
+    const toolInput = data.tool_input || {};
+
+    let filePath = '';
+    if (['Write', 'Edit', 'Read'].includes(tool)) {
+      filePath = toolInput.file_path || '';
+    } else {
+      process.exit(0);
+    }
+
+    if (!filePath) process.exit(0);
+
+    const resolvedFile = path.resolve(filePath);
+    const resolvedProject = path.resolve(projectPath);
+
+    if (resolvedFile.startsWith(resolvedProject + path.sep) || resolvedFile === resolvedProject) {
+      process.exit(0);
+    }
+    if (resolvedFile.startsWith('/tmp/') || resolvedFile.startsWith('/tmp')) {
+      process.exit(0);
+    }
+
+    process.stderr.write('Security: Cannot access "' + filePath + '" - outside project directory "' + projectPath + '"\\n');
+    process.exit(2);
+  } catch (e) {
+    process.exit(0);
+  }
+});
+`;
+
+  fs.writeFileSync(hookPath, hookScript, { mode: 0o755 });
+
+  // Update settings.json to include the hook
+  let settings: Record<string, unknown> = {};
+  if (fs.existsSync(settingsPath)) {
+    try {
+      settings = JSON.parse(fs.readFileSync(settingsPath, 'utf-8'));
+    } catch {
+      settings = {};
+    }
+  }
+
+  // Set up PreToolUse hook for path validation
+  const hooks = (settings.hooks || {}) as Record<string, unknown>;
+  const preToolUse = [
+    {
+      matcher: 'Write|Edit|Read',
+      hooks: [`node ${hookPath}`],
+    },
+  ];
+  hooks.PreToolUse = preToolUse;
+  settings.hooks = hooks;
+
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+  console.log('[INIT] Path validation hook configured');
+}
+
 // Find package root (handles both direct and nested build outputs)
 function findPackageRoot(): string {
   let dir = __dirname;
@@ -44,6 +130,9 @@ const PKG_ROOT = findPackageRoot();
 // Init DB
 createSchema();
 seed();
+
+// Set up security hook for project isolation
+setupPathValidationHook();
 
 const app = express();
 

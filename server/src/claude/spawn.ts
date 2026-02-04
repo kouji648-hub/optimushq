@@ -61,6 +61,7 @@ export function spawnClaude(
   userMessage: string,
   options: SpawnOptions,
   onEvent: EventHandler,
+  projectPath?: string | null,
 ) {
   // Kill any existing process for this session
   killProcess(sessionId);
@@ -76,6 +77,11 @@ export function spawnClaude(
     '--mcp-config', mcpConfigPath,
     '--system-prompt', options.systemPrompt,
   ];
+
+  // Set working directory to project path if available
+  if (projectPath) {
+    args.push('--cwd', projectPath);
+  }
 
   if (options.model) {
     args.push('--model', options.model);
@@ -114,6 +120,10 @@ export function spawnClaude(
   };
   if (sessionUserId) {
     spawnEnv.USER_ID = sessionUserId;
+  }
+  // Pass project path for hook-based path validation
+  if (projectPath) {
+    spawnEnv.PROJECT_PATH = projectPath;
   }
   const githubToken = getToken('token_github', sessionUserId);
   if (githubToken) {

@@ -333,6 +333,12 @@ export function saveUserMessage(sessionId: string, content: string) {
 export function spawnForSession(sessionId: string, content: string, images?: string[], model?: string, thinking?: boolean, mode?: PermissionMode) {
   const db = getDb();
 
+  // Get project path for this session (used for path validation in hooks)
+  const sessionProject = db.prepare(`
+    SELECT p.path FROM sessions s JOIN projects p ON s.project_id = p.id WHERE s.id = ?
+  `).get(sessionId) as { path: string | null } | undefined;
+  const projectPath = sessionProject?.path || null;
+
   // Build message for Claude -- append image references if present
   let claudeContent = content;
   if (images && images.length > 0) {
@@ -357,7 +363,7 @@ export function spawnForSession(sessionId: string, content: string, images?: str
   const toolInteractions: { tool: string; input: unknown; result?: string }[] = [];
 
   streamingSessions.add(sessionId);
-  console.log(`[CHAT] Spawning claude...`);
+  console.log(`[CHAT] Spawning claude... projectPath=${projectPath}`);
   spawnClaude(
     sessionId,
     ctx.fullMessage,
@@ -463,5 +469,6 @@ export function spawnForSession(sessionId: string, content: string, images?: str
           break;
       }
     },
+    projectPath,
   );
 }

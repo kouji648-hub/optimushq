@@ -147,6 +147,14 @@ Dedicated per-project field for dev server management:
 - bcrypt password hashing with database-persisted auth tokens
 - All 13 API routes scoped by user_id with cross-user access blocked
 
+### Project Isolation (Security)
+- Agents are restricted to their assigned project directory via Claude Code hooks
+- File operations (Read, Write, Edit) are validated against the project path
+- Prevents cross-project file access even with `--dangerously-skip-permissions`
+- /tmp is allowed for temporary files
+- General project (no path) has unrestricted access
+- Hook is auto-configured on server startup
+
 ### WhatsApp Integration
 - Chat with agents via WhatsApp on your phone
 - Admin connects WhatsApp via QR code in Settings
