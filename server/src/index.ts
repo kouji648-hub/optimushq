@@ -23,6 +23,7 @@ import mcpsRouter from './routes/mcps.js';
 import apisRouter from './routes/apis.js';
 import internalRouter from './routes/internal.js';
 import whatsappRouter from './routes/whatsapp.js';
+import sosContactsRouter from './routes/sos-contacts.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
@@ -132,6 +133,7 @@ app.use('/api/git', gitRouter);
 app.use('/api/mcps', mcpsRouter);
 app.use('/api/apis', apisRouter);
 app.use('/api/whatsapp', whatsappRouter);
+app.use('/api/sos', sosContactsRouter);
 
 // Image upload for chat — saves base64 image to temp file, returns path
 const UPLOAD_DIR = '/tmp/chat-images';
