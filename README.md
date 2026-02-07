@@ -274,7 +274,7 @@ The app runs at `http://localhost:3001` with the built frontend served staticall
 On first run the server creates:
 
 - **5 agents**: Builder (default), Researcher, Debugger, Writer, DevOps
-- **4 skills**: Code Review, Concise Output, Testing, WordPress Plugin Dev
+- **5 skills**: Code Review, Concise Output, Testing, WordPress Plugin Dev, Email Marketing
 - **2 MCP servers**: Chrome DevTools (user-visible), Project Manager (internal)
 - **1 project**: General (for unscoped chats)
 
