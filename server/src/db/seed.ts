@@ -108,13 +108,40 @@ WordPress runs behind Cloudflare/reverse proxy. It receives HTTP internally but 
 
 IMPORTANT: WORDPRESS_CONFIG_EXTRA only applies during initial WordPress setup. If wp-config.php already exists in the volume, changes to WORDPRESS_CONFIG_EXTRA are IGNORED. In that case, edit wp-config.php directly inside the container (before the require_once wp-settings.php line) or reset the volume with: sudo docker compose down -v && sudo docker compose up -d
 
+## Initial WordPress Installation
+
+After starting containers with \`sudo docker compose up -d\`, **you MUST install WordPress using wp-cli**:
+
+\`\`\`bash
+# Wait for containers to be ready (MySQL needs time to initialize)
+sleep 10
+
+# Install wp-cli inside the WordPress container
+sudo docker compose exec wordpress bash -c "curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp"
+
+# Install WordPress (replace values as needed)
+sudo docker compose exec wordpress wp core install --allow-root \\
+  --url="https://<your-domain>" \\
+  --title="<Site Title>" \\
+  --admin_user="admin" \\
+  --admin_password="admin123" \\
+  --admin_email="admin@example.com"
+
+# Activate the plugin
+sudo docker compose exec wordpress wp plugin activate <plugin-name> --allow-root
+\`\`\`
+
+Replace <your-domain> with the project's subdomain URL (same as WP_HOME/WP_SITEURL). Replace <Site Title> with the project name. Replace <plugin-name> with the plugin slug.
+
+IMPORTANT: Always run the wp core install command after first starting the containers. Without this, WordPress shows the install wizard and won't work properly.
+
 ## Development Workflow
 
 - PHP changes take effect immediately (no build step, no restart needed)
-- To access WordPress admin: use the project's subdomain URL + /wp-admin/ (complete the install wizard on first run)
-- Activate the plugin from the WordPress admin Plugins page
+- To access WordPress admin: use the project's subdomain URL + /wp-admin/
+- Activate the plugin from the WordPress admin Plugins page or via wp-cli
 - If the containers are down, run: sudo docker compose up -d
-- To reset WordPress completely: sudo docker compose down -v && sudo docker compose up -d
+- To reset WordPress completely: sudo docker compose down -v && sudo docker compose up -d (then re-run the install commands above)
 
 ## WordPress Plugin Standards
 
