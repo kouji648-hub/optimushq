@@ -370,6 +370,7 @@ export function spawnForSession(sessionId: string, content: string, images?: str
   }
 
   console.log(`[CHAT] Spawning claude... projectPath=${projectPath}`);
+  try {
   spawnClaude(
     sessionId,
     ctx.fullMessage,
@@ -477,4 +478,10 @@ export function spawnForSession(sessionId: string, content: string, images?: str
     },
     projectPath,
   );
+  } catch (err: any) {
+    console.error(`[CHAT] spawnClaude threw synchronously:`, err.message);
+    streamingSessions.delete(sessionId);
+    messageQueue.delete(sessionId);
+    broadcastToSessionOwner(sessionId, { type: 'chat:error', sessionId, error: err.message });
+  }
 }
