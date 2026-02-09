@@ -113,6 +113,8 @@ export function spawnClaude(
     ...process.env,
     HOME: process.env.HOME || '/home/claude',
   };
+  // Remove ANTHROPIC_API_KEY so claude CLI uses Max plan OAuth instead of API credits
+  delete spawnEnv.ANTHROPIC_API_KEY;
   if (sessionUserId) {
     spawnEnv.USER_ID = sessionUserId;
   }

@@ -201,6 +201,9 @@ function migrateProjectPaths(db: ReturnType<typeof getDb>) {
     // Skip if already in user subdirectory
     if (project.path.includes(`/projects/${project.user_id}/`)) continue;
 
+    // Skip if path is outside PROJECTS_ROOT (custom path)
+    if (!project.path.startsWith(PROJECTS_ROOT)) continue;
+
     const oldPath = project.path;
     const folderName = basename(oldPath);
     const userDir = join(PROJECTS_ROOT, project.user_id);
