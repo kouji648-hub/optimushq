@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { useTheme } from './hooks/useTheme';
@@ -16,12 +17,13 @@ import ApisPage from './pages/ApisPage';
 
 export default function App() {
   const { authenticated, loading, login, logout, username, userId, email, role } = useAuth();
+  const { t } = useTranslation();
   useTheme();
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0d1117] flex items-center justify-center">
-        <div className="text-gray-500 text-sm">Loading...</div>
+        <div className="text-gray-500 text-sm">{t('common.loading')}</div>
       </div>
     );
   }

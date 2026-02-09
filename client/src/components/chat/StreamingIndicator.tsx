@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { useTranslation } from 'react-i18next';
 import { Globe, Terminal, Search, FileText, Loader, Sparkles } from 'lucide-react';
 
 interface ToolActivity {
@@ -28,24 +29,25 @@ function getToolIcon(tool: string) {
   return toolIcons[tool] || <Terminal size={14} />;
 }
 
-function getToolLabel(activity: ToolActivity): string {
+function getToolLabel(activity: ToolActivity, t: (key: string, opts?: Record<string, unknown>) => string): string {
   if (activity.tool === 'WebFetch' && activity.input?.url) {
-    return `Fetching ${activity.input.url}`;
+    return t('chat.fetchingUrl', { url: activity.input.url });
   }
   if (activity.tool === 'WebSearch' && activity.input?.query) {
-    return `Searching: ${activity.input.query}`;
+    return t('chat.searching', { query: activity.input.query });
   }
   if (activity.tool === 'Bash' && activity.input?.command) {
     const cmd = String(activity.input.command);
-    return `Running: ${cmd.length > 60 ? cmd.substring(0, 60) + '...' : cmd}`;
+    return t('chat.running', { cmd: cmd.length > 60 ? cmd.substring(0, 60) + '...' : cmd });
   }
   if (activity.tool === 'Read' && activity.input?.file_path) {
-    return `Reading: ${activity.input.file_path}`;
+    return t('chat.reading', { path: activity.input.file_path });
   }
-  return `Using ${activity.tool}`;
+  return t('chat.usingTool', { tool: activity.tool });
 }
 
 export default function StreamingIndicator({ content, toolActivities, activeSkills, queueTransition }: Props) {
+  const { t } = useTranslation();
   const hasToolActivity = toolActivities.length > 0;
   const hasSkills = activeSkills && activeSkills.length > 0;
 
@@ -62,7 +64,7 @@ export default function StreamingIndicator({ content, toolActivities, activeSkil
             </div>
           )}
           {queueTransition ? (
-            <p className="text-sm text-gray-400 animate-pulse">Reading your message...</p>
+            <p className="text-sm text-gray-400 animate-pulse">{t('chat.readingMessage')}</p>
           ) : (
             <div className="flex items-center gap-1">
               <div className="w-2 h-2 bg-accent-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -102,14 +104,14 @@ export default function StreamingIndicator({ content, toolActivities, activeSkil
                 {activity.type === 'use' ? (
                   <>
                     {getToolIcon(activity.tool)}
-                    <span>{getToolLabel(activity)}</span>
+                    <span>{getToolLabel(activity, t)}</span>
                     {i === toolActivities.length - 1 && activity.type === 'use' && (
                       <Loader size={12} className="animate-spin ml-auto" />
                     )}
                   </>
                 ) : (
                   <>
-                    <span className="text-green-400">Done</span>
+                    <span className="text-green-400">{t('chat.toolDone')}</span>
                     <span className="truncate">{activity.result?.substring(0, 80)}</span>
                   </>
                 )}

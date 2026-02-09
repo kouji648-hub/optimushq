@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { GitBranch, ChevronDown, ChevronRight, Plus, Minus, Download, Upload, AlertCircle, FolderGit2, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useGit } from '../../hooks/useGit';
 import type { Project, GitFileStatus } from '../../../../shared/types';
 
@@ -7,16 +8,6 @@ interface Props {
   projectId: string;
   project: Project;
 }
-
-const STATUS_LABELS: Record<string, string> = {
-  'M': 'Modified',
-  'A': 'Added',
-  'D': 'Deleted',
-  'R': 'Renamed',
-  'C': 'Copied',
-  'U': 'Unmerged',
-  '??': 'Untracked',
-};
 
 function statusColor(status: string): string {
   switch (status) {
@@ -30,6 +21,18 @@ function statusColor(status: string): string {
 }
 
 export default function SourceControl({ projectId, project }: Props) {
+  const { t } = useTranslation();
+
+  const STATUS_LABELS: Record<string, string> = {
+    'M': t('sourceControl.modified'),
+    'A': t('sourceControl.added'),
+    'D': t('sourceControl.deleted'),
+    'R': t('sourceControl.renamed'),
+    'C': t('sourceControl.copied'),
+    'U': t('sourceControl.unmerged'),
+    '??': t('sourceControl.untracked'),
+  };
+
   const {
     status, branches, log, loading, error,
     stage, unstage, commit, checkout, pull, push, getDiff, refresh, init, clone,
@@ -108,7 +111,7 @@ export default function SourceControl({ projectId, project }: Props) {
   if (loading && !status) {
     return (
       <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-        Loading source control...
+        {t('sourceControl.loadingSourceControl')}
       </div>
     );
   }
@@ -119,8 +122,8 @@ export default function SourceControl({ projectId, project }: Props) {
         <div className="max-w-sm w-full space-y-6 text-center">
           <div className="text-gray-500 space-y-1">
             <AlertCircle size={28} className="mx-auto mb-3 text-gray-600" />
-            <div className="text-sm font-medium text-gray-300">No repository found</div>
-            <div className="text-xs">Initialize a new repo or clone an existing one.</div>
+            <div className="text-sm font-medium text-gray-300">{t('sourceControl.noRepoFound')}</div>
+            <div className="text-xs">{t('sourceControl.initOrClone')}</div>
           </div>
 
           <button
@@ -130,8 +133,8 @@ export default function SourceControl({ projectId, project }: Props) {
           >
             <FolderGit2 size={18} className="text-accent-500 shrink-0" />
             <div>
-              <div className="text-sm text-white font-medium">Initialize Repository</div>
-              <div className="text-xs text-gray-500">Create a new git repo in this project folder</div>
+              <div className="text-sm text-white font-medium">{t('sourceControl.initRepo')}</div>
+              <div className="text-xs text-gray-500">{t('sourceControl.initRepoDesc')}</div>
             </div>
           </button>
 
@@ -140,14 +143,14 @@ export default function SourceControl({ projectId, project }: Props) {
               <div className="w-full border-t border-gray-800" />
             </div>
             <div className="relative flex justify-center">
-              <span className="bg-[#0d1117] px-2 text-xs text-gray-600">or</span>
+              <span className="bg-[#0d1117] px-2 text-xs text-gray-600">{t('common.or')}</span>
             </div>
           </div>
 
           <div className="bg-[#161b22] border border-gray-700/50 rounded-lg px-4 py-3 space-y-2.5 text-left">
             <div className="flex items-center gap-2">
               <Globe size={16} className="text-blue-400 shrink-0" />
-              <div className="text-sm text-white font-medium">Clone Repository</div>
+              <div className="text-sm text-white font-medium">{t('sourceControl.cloneRepo')}</div>
             </div>
             <input
               type="text"
@@ -161,7 +164,7 @@ export default function SourceControl({ projectId, project }: Props) {
               disabled={!cloneUrl.trim() || loading}
               className="w-full bg-accent-600 hover:bg-accent-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-medium px-3 py-1.5 rounded transition-colors"
             >
-              {loading ? 'Cloning...' : 'Clone'}
+              {loading ? t('sourceControl.cloning') : t('sourceControl.clone')}
             </button>
           </div>
 
@@ -199,7 +202,7 @@ export default function SourceControl({ projectId, project }: Props) {
           <textarea
             value={commitMsg}
             onChange={(e) => setCommitMsg(e.target.value)}
-            placeholder="Commit message..."
+            placeholder={t('sourceControl.commitMessage')}
             rows={2}
             className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-accent-500/50 resize-none"
           />
@@ -208,7 +211,7 @@ export default function SourceControl({ projectId, project }: Props) {
             disabled={!commitMsg.trim() || stagedFiles.length === 0 || actionLoading}
             className="w-full mt-1.5 bg-accent-600 hover:bg-accent-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-medium px-3 py-1.5 rounded transition-colors"
           >
-            Commit ({stagedFiles.length} staged)
+            {t('sourceControl.commitStaged', { count: stagedFiles.length })}
           </button>
         </div>
 
@@ -216,29 +219,31 @@ export default function SourceControl({ projectId, project }: Props) {
         <div className="flex-1 overflow-y-auto">
           {/* Staged files */}
           <FileSection
-            title="Staged Changes"
+            title={t('sourceControl.stagedChanges')}
             files={stagedFiles}
             actionIcon={<Minus size={12} />}
-            actionTitle="Unstage"
+            actionTitle={t('sourceControl.unstage')}
             onAction={(f) => handleUnstage([f.path])}
             onSelect={handleViewDiff}
             selectedPath={diffPath}
             defaultExpanded
+            statusLabels={STATUS_LABELS}
           />
 
           {/* Unstaged files */}
           <FileSection
-            title="Changes"
+            title={t('sourceControl.changes')}
             files={unstagedFiles}
             actionIcon={<Plus size={12} />}
-            actionTitle="Stage"
+            actionTitle={t('sourceControl.stage')}
             onAction={(f) => handleStage([f.path])}
             onSelect={handleViewDiff}
             selectedPath={diffPath}
             defaultExpanded
+            statusLabels={STATUS_LABELS}
             headerAction={unstagedFiles.length > 0 ? {
               icon: <Plus size={12} />,
-              title: 'Stage All',
+              title: t('sourceControl.stageAll'),
               onClick: () => handleStage(unstagedFiles.map(f => f.path)),
             } : undefined}
           />
@@ -250,7 +255,7 @@ export default function SourceControl({ projectId, project }: Props) {
               onClick={() => setShowLog(!showLog)}
             >
               {showLog ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-              Recent Commits ({log.length})
+              {t('sourceControl.recentCommits', { count: log.length })}
             </button>
             {showLog && (
               <div className="px-2 pb-2">
@@ -274,9 +279,9 @@ export default function SourceControl({ projectId, project }: Props) {
             </div>
           )}
           <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-            {(status?.ahead ?? 0) > 0 && <span className="text-green-400">{status!.ahead} ahead</span>}
+            {(status?.ahead ?? 0) > 0 && <span className="text-green-400">{t('sourceControl.ahead', { count: status!.ahead })}</span>}
             {(status?.ahead ?? 0) > 0 && (status?.behind ?? 0) > 0 && <span>|</span>}
-            {(status?.behind ?? 0) > 0 && <span className="text-blue-400">{status!.behind} behind</span>}
+            {(status?.behind ?? 0) > 0 && <span className="text-blue-400">{t('sourceControl.behind', { count: status!.behind })}</span>}
           </div>
           <div className="flex gap-2">
             <button
@@ -284,15 +289,15 @@ export default function SourceControl({ projectId, project }: Props) {
               disabled={actionLoading}
               className="flex-1 flex items-center justify-center gap-1 bg-[#161b22] hover:bg-gray-800 border border-gray-700/50 text-gray-300 text-xs px-2 py-1.5 rounded transition-colors disabled:opacity-40"
             >
-              <Download size={12} /> Pull
+              <Download size={12} /> {t('sourceControl.pull')}
             </button>
             <button
               onClick={handlePush}
               disabled={actionLoading || pushBlocked}
-              title={pushDisabled ? 'Push disabled (pull-only mode)' : isOnProtectedBranch ? `Branch "${status?.branch}" is protected` : 'Push'}
+              title={pushDisabled ? t('sourceControl.pushDisabled') : isOnProtectedBranch ? t('sourceControl.branchProtected', { branch: status?.branch }) : t('sourceControl.push')}
               className="flex-1 flex items-center justify-center gap-1 bg-[#161b22] hover:bg-gray-800 border border-gray-700/50 text-gray-300 text-xs px-2 py-1.5 rounded transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <Upload size={12} /> Push
+              <Upload size={12} /> {t('sourceControl.push')}
             </button>
           </div>
         </div>
@@ -331,7 +336,7 @@ export default function SourceControl({ projectId, project }: Props) {
           </>
         ) : (
           <div className="flex items-center justify-center h-full text-gray-600 text-sm">
-            Select a file to view diff
+            {t('sourceControl.selectFileForDiff')}
           </div>
         )}
       </div>
@@ -350,6 +355,7 @@ interface FileSectionProps {
   onSelect: (file: GitFileStatus) => void;
   selectedPath: string | null;
   defaultExpanded?: boolean;
+  statusLabels: Record<string, string>;
   headerAction?: {
     icon: React.ReactNode;
     title: string;
@@ -359,7 +365,7 @@ interface FileSectionProps {
 
 function FileSection({
   title, files, actionIcon, actionTitle, onAction, onSelect,
-  selectedPath, defaultExpanded, headerAction,
+  selectedPath, defaultExpanded, statusLabels, headerAction,
 }: FileSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded ?? true);
 
@@ -395,7 +401,7 @@ function FileSection({
             {file.status === '??' ? 'U' : file.status}
           </span>
           <span className="truncate flex-1">{file.path}</span>
-          <span className="text-[10px] text-gray-600">{STATUS_LABELS[file.status] || file.status}</span>
+          <span className="text-[10px] text-gray-600">{statusLabels[file.status] || file.status}</span>
           <button
             className="opacity-0 group-hover:opacity-100 text-gray-500 hover:text-white p-0.5 transition-opacity"
             title={actionTitle}

@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArrowUp, Square, X, ChevronDown, Sparkles, Check, Eye, MessageSquare, Zap, FileSpreadsheet } from 'lucide-react';
 import { api } from '../../api/http';
 import type { PermissionMode } from '../../../../shared/types';
@@ -16,18 +17,6 @@ interface PendingFile {
 
 const ALLOWED_FILE_TYPES = ['text/csv', 'application/vnd.ms-excel'];
 
-const MODELS = [
-  { value: 'sonnet', label: 'Sonnet', desc: 'Balanced speed and intelligence' },
-  { value: 'haiku', label: 'Haiku', desc: 'Fast and lightweight' },
-  { value: 'opus', label: 'Opus', desc: 'Most capable, highest quality' },
-];
-
-const MODES: { value: PermissionMode; label: string; desc: string; icon: typeof Eye }[] = [
-  { value: 'execute', label: 'Execute', desc: 'Full autonomous execution', icon: Zap },
-  { value: 'ask', label: 'Ask', desc: 'Confirms before making edits', icon: MessageSquare },
-  { value: 'explore', label: 'Explore', desc: 'Read-only, no file changes', icon: Eye },
-];
-
 interface Props {
   onSend: (content: string, images?: string[], model?: string, thinking?: boolean, mode?: PermissionMode) => void;
   onStop: () => void;
@@ -40,6 +29,7 @@ interface Props {
 }
 
 export default function ChatInput({ onSend, onStop, streaming, disabled, defaultModel, defaultThinking, defaultMode, sessionId }: Props) {
+  const { t } = useTranslation();
   const [input, setInput] = useState('');
   const [images, setImages] = useState<PendingImage[]>([]);
   const [files, setFiles] = useState<PendingFile[]>([]);
@@ -49,6 +39,19 @@ export default function ChatInput({ onSend, onStop, streaming, disabled, default
   const [mode, setMode] = useState<PermissionMode>(defaultMode || 'execute');
   const [showModelMenu, setShowModelMenu] = useState(false);
   const [showModeMenu, setShowModeMenu] = useState(false);
+
+  const MODELS = useMemo(() => [
+    { value: 'sonnet', label: t('models.sonnet'), desc: t('models.sonnetDesc') },
+    { value: 'haiku', label: t('models.haiku'), desc: t('models.haikuDesc') },
+    { value: 'opus', label: t('models.opus'), desc: t('models.opusDesc') },
+  ], [t]);
+
+  const MODES: { value: PermissionMode; label: string; desc: string; icon: typeof Eye }[] = useMemo(() => [
+    { value: 'execute', label: t('modes.execute'), desc: t('modes.executeDesc'), icon: Zap },
+    { value: 'ask', label: t('modes.ask'), desc: t('modes.askDesc'), icon: MessageSquare },
+    { value: 'explore', label: t('modes.explore'), desc: t('modes.exploreDesc'), icon: Eye },
+  ], [t]);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropRef = useRef<HTMLDivElement>(null);
   const modelMenuRef = useRef<HTMLDivElement>(null);
@@ -255,7 +258,7 @@ export default function ChatInput({ onSend, onStop, streaming, disabled, default
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onPaste={handlePaste}
-            placeholder={disabled ? 'Select a session to start chatting...' : 'Message...'}
+            placeholder={disabled ? t('chat.selectSessionDisabled') : t('chat.placeholder')}
             disabled={disabled}
             rows={2}
             className="w-full resize-none bg-transparent px-4 pt-3 pb-2 text-sm text-white placeholder-gray-600 focus:outline-none disabled:opacity-50"
@@ -316,9 +319,9 @@ export default function ChatInput({ onSend, onStop, streaming, disabled, default
                           <Sparkles size={14} className={thinking ? 'text-amber-400' : 'text-gray-500'} />
                           <div>
                             <div className={`text-sm font-medium ${thinking ? 'text-amber-400' : 'text-gray-200'}`}>
-                              Thinking
+                              {t('thinking.label')}
                             </div>
-                            <div className="text-[11px] text-gray-500 mt-0.5">Extended reasoning before responding</div>
+                            <div className="text-[11px] text-gray-500 mt-0.5">{t('thinking.description')}</div>
                           </div>
                         </div>
                         {thinking && (
@@ -391,7 +394,7 @@ export default function ChatInput({ onSend, onStop, streaming, disabled, default
                 <button
                   onClick={onStop}
                   className="p-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-white transition-colors"
-                  title="Stop"
+                  title={t('chat.stop')}
                 >
                   <Square size={14} />
                 </button>
@@ -404,7 +407,7 @@ export default function ChatInput({ onSend, onStop, streaming, disabled, default
                     ? 'bg-amber-600 hover:bg-amber-700'
                     : 'bg-accent-600 hover:bg-accent-700 disabled:bg-gray-700 disabled:text-gray-500'
                 }`}
-                title={streaming ? 'Queue message' : 'Send'}
+                title={streaming ? t('chat.queueMessage') : t('common.send')}
               >
                 <ArrowUp size={14} strokeWidth={2.5} />
               </button>

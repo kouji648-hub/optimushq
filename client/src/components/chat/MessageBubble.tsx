@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import ActivityLog from './ActivityLog';
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function MessageBubble({ message }: Props) {
+  const { t } = useTranslation();
   const isUser = message.role === 'user';
 
   const toolActivities = useMemo(() => {
@@ -65,7 +67,7 @@ export default function MessageBubble({ message }: Props) {
         <div className={`text-xs mt-2 flex items-center gap-2 ${isUser ? 'text-accent-200/70' : 'text-gray-600'}`}>
           <span>{new Date(message.created_at).toLocaleTimeString()}</span>
           {!isUser && message.interrupted === 1 && (
-            <span className="italic text-yellow-500/70">[stopped]</span>
+            <span className="italic text-yellow-500/70">{t('chat.stopped')}</span>
           )}
         </div>
       </div>

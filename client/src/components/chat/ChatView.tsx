@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import MessageBubble from './MessageBubble';
 import StreamingIndicator from './StreamingIndicator';
 import ChatInput from './ChatInput';
@@ -35,6 +36,7 @@ export default function ChatView({
   queuedMessages, queueTransition,
   onSend, onStop, hasSession, defaultModel, defaultThinking, defaultMode, sessionId,
 }: Props) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function ChatView({
         <div className="max-w-4xl mx-auto min-w-0">
           {!hasSession && (
             <div className="flex items-center justify-center h-full text-gray-500 text-sm">
-              Select or create a session to start chatting
+              {t('chat.selectSession')}
             </div>
           )}
           {messages.map((m) => (
@@ -65,7 +67,7 @@ export default function ChatView({
           )}
           {lastCost !== null && !streaming && (
             <div className="text-center text-xs text-gray-600 mb-2">
-              Cost: ${lastCost.toFixed(4)}
+              {t('chat.cost', { amount: lastCost.toFixed(4) })}
             </div>
           )}
         </div>
@@ -75,7 +77,7 @@ export default function ChatView({
           <div className="max-w-4xl mx-auto space-y-1.5">
             {queuedMessages.map((m) => (
               <div key={m.id} className="flex items-center justify-end gap-2">
-                <span className="text-[11px] text-gray-500">(Queued)</span>
+                <span className="text-[11px] text-gray-500">{t('chat.queued')}</span>
                 <div className="bg-accent-600/40 text-white/70 rounded-lg px-3 py-1.5 text-sm max-w-[70%] truncate">
                   {m.content}
                 </div>

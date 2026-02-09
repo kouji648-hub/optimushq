@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AlertCircle, X, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../api/http';
 import { AuthContext } from '../../App';
 
 export default function SetupBanner() {
+  const { t } = useTranslation();
   const { role } = useContext(AuthContext);
   const [show, setShow] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -40,20 +42,20 @@ export default function SetupBanner() {
         <div className="flex items-center gap-3 text-amber-400">
           <AlertCircle size={18} className="flex-shrink-0" />
           <span className="text-sm">
-            Set your base domain to enable project subdomain URLs.
+            {t('setupBanner.message')}
           </span>
           <Link
             to="/settings"
             className="inline-flex items-center gap-1 text-sm font-medium text-amber-300 hover:text-amber-200 transition-colors"
           >
-            Go to Settings
+            {t('setupBanner.goToSettings')}
             <ArrowRight size={14} />
           </Link>
         </div>
         <button
           onClick={handleDismiss}
           className="p-1 text-amber-400/60 hover:text-amber-400 transition-colors"
-          title="Dismiss"
+          title={t('common.dismiss')}
         >
           <X size={16} />
         </button>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Circle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useFiles } from '../../hooks/useFiles';
 import FileTree from './FileTree';
 import CodeEditor from './CodeEditor';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function FileExplorer({ projectId }: Props) {
+  const { t } = useTranslation();
   const { tree, fetchTree, readFile, writeFile, createItem, deleteItem } = useFiles(projectId);
   const [openFiles, setOpenFiles] = useState<OpenFile[]>([]);
   const [activeFilePath, setActiveFilePath] = useState<string | null>(null);
@@ -85,27 +87,27 @@ export default function FileExplorer({ projectId }: Props) {
   }, [activeFile, writeFile]);
 
   const handleCreateItem = useCallback(async (parentPath: string, type: 'file' | 'dir') => {
-    const name = prompt(type === 'dir' ? 'Folder name:' : 'File name:');
+    const name = prompt(type === 'dir' ? t('files.folderNamePrompt') : t('files.fileNamePrompt'));
     if (!name) return;
     const fullPath = parentPath ? `${parentPath}/${name}` : name;
     await createItem(fullPath, type);
-  }, [createItem]);
+  }, [createItem, t]);
 
   const handleDeleteItem = useCallback(async (path: string) => {
-    if (!confirm(`Delete "${path}"?`)) return;
+    if (!confirm(t('files.deleteConfirm', { path }))) return;
     const ok = await deleteItem(path);
     if (ok) {
       // Close if open
       handleCloseFile(path);
     }
-  }, [deleteItem, handleCloseFile]);
+  }, [deleteItem, handleCloseFile, t]);
 
   return (
     <div className="flex h-full">
       {/* File tree panel */}
       <div className="w-64 border-r border-gray-800/50 bg-[#0d1117] flex flex-col shrink-0">
         <div className="h-8 flex items-center px-3 text-xs text-gray-500 uppercase tracking-wide border-b border-gray-800/50 font-medium">
-          Explorer
+          {t('files.explorer')}
         </div>
         <FileTree
           tree={tree}
@@ -155,7 +157,7 @@ export default function FileExplorer({ projectId }: Props) {
             />
           ) : (
             <div className="flex items-center justify-center h-full text-gray-600 text-sm">
-              Select a file to edit
+              {t('files.selectFile')}
             </div>
           )}
         </div>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { RefreshCw, Trash2 } from 'lucide-react';
 import { api } from '../api/http';
 import PageShell from '../components/layout/PageShell';
 
 export default function LogsPage() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState('');
   const [logType, setLogType] = useState<'out' | 'error'>('out');
   const [lines, setLines] = useState(100);
@@ -42,19 +44,19 @@ export default function LogsPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center gap-3 px-6 py-3 border-b border-gray-800/50 bg-[#161b22]">
-          <h2 className="text-lg font-bold text-white mr-4">Logs</h2>
+          <h2 className="text-lg font-bold text-white mr-4">{t('logs.title')}</h2>
           <div className="flex gap-1 bg-gray-800 rounded p-0.5">
             <button
               onClick={() => setLogType('out')}
               className={`px-3 py-1 text-xs rounded transition-colors ${logType === 'out' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}
             >
-              stdout
+              {t('logs.stdout')}
             </button>
             <button
               onClick={() => setLogType('error')}
               className={`px-3 py-1 text-xs rounded transition-colors ${logType === 'error' ? 'bg-red-900/50 text-red-400' : 'text-gray-400 hover:text-white'}`}
             >
-              stderr
+              {t('logs.stderr')}
             </button>
           </div>
           <select
@@ -62,10 +64,10 @@ export default function LogsPage() {
             onChange={(e) => setLines(Number(e.target.value))}
             className="bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs text-white focus:outline-none"
           >
-            <option value={50}>50 lines</option>
-            <option value={100}>100 lines</option>
-            <option value={300}>300 lines</option>
-            <option value={500}>500 lines</option>
+            <option value={50}>{t('logs.lines50')}</option>
+            <option value={100}>{t('logs.lines100')}</option>
+            <option value={300}>{t('logs.lines300')}</option>
+            <option value={500}>{t('logs.lines500')}</option>
           </select>
           <label className="flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer">
             <input
@@ -74,14 +76,14 @@ export default function LogsPage() {
               onChange={(e) => setAutoRefresh(e.target.checked)}
               className="rounded border-gray-600 bg-gray-800 text-accent-500"
             />
-            Auto-refresh
+            {t('logs.autoRefresh')}
           </label>
           <button
             onClick={fetchLogs}
             disabled={loading}
             className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400 hover:text-white transition-colors"
           >
-            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> Refresh
+            <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> {t('common.refresh')}
           </button>
         </div>
 
@@ -90,7 +92,7 @@ export default function LogsPage() {
           ref={containerRef}
           className="flex-1 overflow-auto p-4 text-xs font-mono leading-relaxed text-gray-300 bg-[#0d1117]"
         >
-          {logs || (loading ? 'Loading...' : 'No logs available.')}
+          {logs || (loading ? t('common.loading') : t('logs.noLogs'))}
         </pre>
       </div>
     </PageShell>

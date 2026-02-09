@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Save, X, Globe, FolderOpen, Loader, Send } from 'lucide-react';
 import { api } from '../../api/http';
 import type { Skill, Project, Agent, Session } from '../../../../shared/types';
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
 
   const renderProjectPicker = (selectedIds: string[], onChange: (ids: string[]) => void) => (
     <div className="mt-2">
-      <label className="block text-xs text-gray-500 mb-1.5">Assign to projects</label>
+      <label className="block text-xs text-gray-500 mb-1.5">{t('skills.assignToProjects')}</label>
       <div className="flex flex-wrap gap-1.5">
         {realProjects.map(p => {
           const selected = selectedIds.includes(p.id);
@@ -141,7 +143,7 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
         })}
       </div>
       {realProjects.length === 0 && (
-        <p className="text-xs text-gray-600 mt-1">No projects available</p>
+        <p className="text-xs text-gray-600 mt-1">{t('skills.noProjectsAvailable')}</p>
       )}
     </div>
   );
@@ -161,7 +163,7 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
             {s.scope}
           </span>
           {s.source_url && (
-            <span className="text-xs bg-gray-700/50 text-gray-400 px-1.5 py-0.5 rounded">imported</span>
+            <span className="text-xs bg-gray-700/50 text-gray-400 px-1.5 py-0.5 rounded">{t('common.imported')}</span>
           )}
         </div>
         {s.description && <p className="text-xs text-gray-500 mt-0.5">{s.description}</p>}
@@ -200,12 +202,12 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">Skills</h2>
+        <h2 className="text-xl font-bold text-white">{t('skills.title')}</h2>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm({ name: '', description: '', prompt: '', scope: 'global', icon: '', projectIds: [] }); setGenerateInput(''); setGenerateError(''); }}
           className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
         >
-          <Plus size={14} /> New Skill
+          <Plus size={14} /> {t('skills.newSkill')}
         </button>
       </div>
 
@@ -215,9 +217,9 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
           {/* Generate step — only for new skills, before form is filled */}
           {showCreate && !isFormFilled && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">What should this skill do?</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">{t('skills.whatShouldDo')}</label>
               <p className="text-xs text-gray-500 mb-3">
-                Describe a skill, paste a URL, or ask to import skills from a repository. An agent will handle the rest.
+                {t('skills.skillDesc')}
               </p>
               <textarea
                 value={generateInput}
@@ -236,10 +238,10 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 rounded text-sm text-white"
                 >
                   {generating ? <Loader size={14} className="animate-spin" /> : <Send size={14} />}
-                  {generating ? 'Starting...' : 'Send'}
+                  {generating ? t('skills.starting') : t('common.send')}
                 </button>
                 <button onClick={closeForm} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300">
-                  <X size={14} /> Cancel
+                  <X size={14} /> {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -258,14 +260,14 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
                 <input
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  placeholder="Skill name"
+                  placeholder={t('skills.skillName')}
                   className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
                 />
               </div>
               <input
                 value={form.description}
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
-                placeholder="Description"
+                placeholder={t('common.description')}
                 className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50 mb-3"
               />
               <textarea
@@ -281,8 +283,8 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
                   onChange={(e) => setForm({ ...form, scope: e.target.value })}
                   className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50"
                 >
-                  <option value="global">Global scope</option>
-                  <option value="project">Project scope</option>
+                  <option value="global">{t('skills.globalScope')}</option>
+                  <option value="project">{t('skills.projectScope')}</option>
                 </select>
                 {form.scope === 'project' && renderProjectPicker(form.projectIds, (ids) => setForm({ ...form, projectIds: ids }))}
               </div>
@@ -291,10 +293,10 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
                   onClick={editingId ? handleUpdate : handleCreate}
                   className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
                 >
-                  <Save size={14} /> {editingId ? 'Update' : 'Create'}
+                  <Save size={14} /> {editingId ? t('common.update') : t('common.create')}
                 </button>
                 <button onClick={closeForm} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300">
-                  <X size={14} /> Cancel
+                  <X size={14} /> {t('common.cancel')}
                 </button>
               </div>
             </>
@@ -306,7 +308,7 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
       {globalSkills.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-            <Globe size={14} /> Global Skills
+            <Globe size={14} /> {t('skills.globalSkills')}
           </h3>
           <div className="space-y-3">
             {globalSkills.map(renderSkillCard)}
@@ -318,7 +320,7 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
       {projectSkills.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-            <FolderOpen size={14} /> Project Skills
+            <FolderOpen size={14} /> {t('skills.projectSkills')}
           </h3>
           <div className="space-y-3">
             {projectSkills.map(renderSkillCard)}
@@ -328,8 +330,8 @@ export default function SkillManager({ skills, onCreate, onUpdate, onDelete }: P
 
       {skills.length === 0 && !showCreate && (
         <div className="text-center py-12 text-gray-500">
-          <p className="text-lg mb-2">No skills yet</p>
-          <p className="text-sm">Create a skill to teach your agents new capabilities</p>
+          <p className="text-lg mb-2">{t('skills.noSkills')}</p>
+          <p className="text-sm">{t('skills.createSkill')}</p>
         </div>
       )}
     </div>

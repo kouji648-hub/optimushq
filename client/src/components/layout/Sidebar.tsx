@@ -8,6 +8,7 @@ import { AuthContext } from '../../App';
 import { api, setImpersonateUserId, getImpersonateUserId } from '../../api/http';
 import { useMobileSidebar } from './MobileSidebar';
 import { useMobile } from '../../hooks/useMobile';
+import { useTranslation } from 'react-i18next';
 import type { Project, Session } from '../../../../shared/types';
 
 interface Props {
@@ -63,6 +64,7 @@ export default function Sidebar({
   onSelectProject, onSelectSession, onCreateProject, onCreateSession,
   onDeleteSession,
 }: Props) {
+  const { t } = useTranslation();
   const [newProjectName, setNewProjectName] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [internalProjects, setInternalProjects] = useState<Project[]>([]);
@@ -164,13 +166,13 @@ export default function Sidebar({
 
       <div className="flex-1 overflow-y-auto">
         {/* CHAT section */}
-        <SectionHeader label="Chat" />
-        <NavItem to="/chat" icon={<MessageCircle size={16} />} label="Chat" active={isChatActive} onClick={handleNavClick} />
-        <NavItem to="/board" icon={<LayoutGrid size={16} />} label="Tasks" active={location.pathname === '/board'} onClick={handleNavClick} />
+        <SectionHeader label={t('sidebar.chat')} />
+        <NavItem to="/chat" icon={<MessageCircle size={16} />} label={t('sidebar.chat')} active={isChatActive} onClick={handleNavClick} />
+        <NavItem to="/board" icon={<LayoutGrid size={16} />} label={t('sidebar.tasks')} active={location.pathname === '/board'} onClick={handleNavClick} />
 
         {/* PROJECTS section — always shown */}
         <SectionHeader
-          label="Projects"
+          label={t('sidebar.projects')}
           onAction={() => setShowForm(!showForm)}
           actionIcon={<FolderPlus size={14} />}
         />
@@ -181,7 +183,7 @@ export default function Sidebar({
               autoFocus
               value={newProjectName}
               onChange={(e) => setNewProjectName(e.target.value)}
-              placeholder="Project name"
+              placeholder={t('sidebar.projectName')}
               className="w-full px-2.5 py-1.5 text-sm bg-gray-800/60 border border-gray-700/50 rounded text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
             />
           </form>
@@ -215,7 +217,7 @@ export default function Sidebar({
                     if (isMobile) closeSidebar();
                   }}
                   className="text-gray-600 hover:text-gray-300 transition-colors"
-                  title="Project settings"
+                  title={t('sidebar.projectSettings')}
                 >
                   <Settings2 size={13} />
                 </button>
@@ -229,7 +231,7 @@ export default function Sidebar({
                   onClick={onCreateSession}
                   className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-gray-500 hover:text-accent-400 w-full transition-colors"
                 >
-                  <MessageSquarePlus size={12} /> New Session
+                  <MessageSquarePlus size={12} /> {t('sidebar.newSession')}
                 </button>
                 {sessions.filter(s => s.project_id === p.id).map((s) => (
                   <div
@@ -254,20 +256,20 @@ export default function Sidebar({
         ))}
 
         {projects.length === 0 && (
-          <div className="px-4 py-2 text-xs text-gray-600">No projects yet</div>
+          <div className="px-4 py-2 text-xs text-gray-600">{t('sidebar.noProjectsYet')}</div>
         )}
 
         {/* AGENT section */}
-        <SectionHeader label="Agent" />
-        <NavItem to="/skills" icon={<Zap size={16} />} label="Skills" active={location.pathname === '/skills'} count={counts.skills} onClick={handleNavClick} />
-        <NavItem to="/agents" icon={<Bot size={16} />} label="Agents" active={location.pathname === '/agents'} count={counts.agents} onClick={handleNavClick} />
-        <NavItem to="/mcps" icon={<Plug size={16} />} label="MCPs" active={location.pathname === '/mcps'} count={counts.mcps} onClick={handleNavClick} />
-        <NavItem to="/apis" icon={<Cable size={16} />} label="APIs" active={location.pathname === '/apis'} count={counts.apis} onClick={handleNavClick} />
+        <SectionHeader label={t('sidebar.agent')} />
+        <NavItem to="/skills" icon={<Zap size={16} />} label={t('sidebar.skills')} active={location.pathname === '/skills'} count={counts.skills} onClick={handleNavClick} />
+        <NavItem to="/agents" icon={<Bot size={16} />} label={t('sidebar.agents')} active={location.pathname === '/agents'} count={counts.agents} onClick={handleNavClick} />
+        <NavItem to="/mcps" icon={<Plug size={16} />} label={t('sidebar.mcps')} active={location.pathname === '/mcps'} count={counts.mcps} onClick={handleNavClick} />
+        <NavItem to="/apis" icon={<Cable size={16} />} label={t('sidebar.apis')} active={location.pathname === '/apis'} count={counts.apis} onClick={handleNavClick} />
 
         {/* SETTINGS section */}
-        <SectionHeader label="Settings" />
-        <NavItem to="/settings" icon={<Settings size={16} />} label="Config" active={location.pathname === '/settings'} onClick={handleNavClick} />
-        <NavItem to="/logs" icon={<ScrollText size={16} />} label="Logs" active={location.pathname === '/logs'} onClick={handleNavClick} />
+        <SectionHeader label={t('sidebar.settings')} />
+        <NavItem to="/settings" icon={<Settings size={16} />} label={t('sidebar.config')} active={location.pathname === '/settings'} onClick={handleNavClick} />
+        <NavItem to="/logs" icon={<ScrollText size={16} />} label={t('sidebar.logs')} active={location.pathname === '/logs'} onClick={handleNavClick} />
       </div>
 
       {/* User / Logout */}
@@ -281,8 +283,8 @@ export default function Sidebar({
             >
               <span className="truncate">
                 {getImpersonateUserId()
-                  ? `Viewing: ${users.find(u => u.id === getImpersonateUserId())?.username || 'Unknown'}`
-                  : 'Users'}
+                  ? t('sidebar.viewing', { name: users.find(u => u.id === getImpersonateUserId())?.username || 'Unknown' })
+                  : t('sidebar.users')}
               </span>
               <ChevronDown size={12} />
             </button>
@@ -295,20 +297,20 @@ export default function Sidebar({
                       autoFocus
                       value={newUser.username}
                       onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
-                      placeholder="Username"
+                      placeholder={t('login.username')}
                       className="w-full px-2 py-1.5 mb-1.5 text-xs bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
                     />
                     <input
                       value={newUser.email}
                       onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                      placeholder="Email"
+                      placeholder={t('sidebar.email')}
                       className="w-full px-2 py-1.5 mb-1.5 text-xs bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
                     />
                     <input
                       type="password"
                       value={newUser.password}
                       onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-                      placeholder="Password"
+                      placeholder={t('login.password')}
                       className="w-full px-2 py-1.5 mb-1.5 text-xs bg-gray-900 border border-gray-700 rounded text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
                     />
                     {addUserError && <p className="text-[10px] text-red-400 mb-1.5">{addUserError}</p>}
@@ -316,7 +318,7 @@ export default function Sidebar({
                       <button
                         onClick={async () => {
                           if (!newUser.username || !newUser.email || !newUser.password) {
-                            setAddUserError('All fields required');
+                            setAddUserError(t('sidebar.allFieldsRequired'));
                             return;
                           }
                           try {
@@ -327,18 +329,18 @@ export default function Sidebar({
                             setNewUser({ username: '', email: '', password: '' });
                             setShowAddUser(false);
                           } catch (err: any) {
-                            setAddUserError(err.message || 'Failed to create user');
+                            setAddUserError(err.message || t('sidebar.failedToCreateUser'));
                           }
                         }}
                         className="flex-1 px-2 py-1 text-[10px] bg-accent-600 hover:bg-accent-700 rounded text-white"
                       >
-                        Create
+                        {t('common.create')}
                       </button>
                       <button
                         onClick={() => { setShowAddUser(false); setAddUserError(''); setNewUser({ username: '', email: '', password: '' }); }}
                         className="px-2 py-1 text-[10px] bg-gray-700 hover:bg-gray-600 rounded text-gray-300"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -347,7 +349,7 @@ export default function Sidebar({
                     onClick={() => setShowAddUser(true)}
                     className="w-full flex items-center gap-1.5 px-3 py-2 text-xs text-accent-400 hover:bg-gray-800/60 transition-colors border-b border-gray-800/50"
                   >
-                    <UserPlus size={11} /> Add user
+                    <UserPlus size={11} /> {t('sidebar.addUser')}
                   </button>
                 )}
                 {users.length > 1 && (
@@ -361,7 +363,7 @@ export default function Sidebar({
                       !getImpersonateUserId() ? 'text-accent-400' : 'text-gray-300'
                     }`}
                   >
-                    My account
+                    {t('sidebar.myAccount')}
                   </button>
                 )}
                 {users.filter(u => u.role !== 'admin').map(u => (
@@ -393,7 +395,7 @@ export default function Sidebar({
           <button
             onClick={logout}
             className="p-1.5 text-gray-500 hover:text-red-400 transition-colors flex-shrink-0"
-            title="Sign out"
+            title={t('sidebar.signOut')}
           >
             <LogOut size={15} />
           </button>

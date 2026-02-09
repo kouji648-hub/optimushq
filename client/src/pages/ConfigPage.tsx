@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../locales/i18n';
 import { api } from '../api/http';
 import PageShell from '../components/layout/PageShell';
 import {
@@ -11,39 +13,11 @@ import { useTheme } from '../hooks/useTheme';
 import { THEME_COLORS, type ThemeColorName } from '../theme/colors';
 import { AuthContext } from '../App';
 
-// All Claude Code built-in tools
-const ALL_TOOLS = [
-  { name: 'Bash', description: 'Execute shell commands' },
-  { name: 'Read', description: 'Read file contents' },
-  { name: 'Write', description: 'Create or overwrite files' },
-  { name: 'Edit', description: 'Make targeted edits to files' },
-  { name: 'Glob', description: 'Find files by pattern' },
-  { name: 'Grep', description: 'Search file contents' },
-  { name: 'WebFetch', description: 'Fetch content from URLs' },
-  { name: 'WebSearch', description: 'Search the web' },
-  { name: 'NotebookEdit', description: 'Edit Jupyter notebooks' },
-  { name: 'Task', description: 'Launch sub-agents' },
-];
-
-// MCP tools
-const MCP_TOOLS = [
-  { name: 'mcp__chrome-devtools__take_screenshot', description: 'Take browser screenshots' },
-  { name: 'mcp__chrome-devtools__navigate_page', description: 'Navigate browser pages' },
-  { name: 'mcp__chrome-devtools__click', description: 'Click browser elements' },
-  { name: 'mcp__chrome-devtools__fill', description: 'Fill form inputs' },
-  { name: 'mcp__chrome-devtools__take_snapshot', description: 'Take page snapshots' },
-  { name: 'mcp__chrome-devtools__evaluate_script', description: 'Run JavaScript in browser' },
-];
-
 interface TokenConfig {
   key: string;
   label: string;
   placeholder: string;
 }
-
-const TOKENS: TokenConfig[] = [
-  { key: 'token_github', label: 'GitHub Token', placeholder: 'ghp_xxxx or github_pat_xxxx' },
-];
 
 interface WhatsAppStatus {
   connected: boolean;
@@ -52,6 +26,7 @@ interface WhatsAppStatus {
 }
 
 export default function ConfigPage() {
+  const { t } = useTranslation();
   const { role } = useContext(AuthContext);
   const [allowedTools, setAllowedTools] = useState<string[]>([]);
   const [disallowedTools, setDisallowedTools] = useState<string[]>([]);
@@ -84,6 +59,34 @@ export default function ConfigPage() {
   const [baseDomain, setBaseDomain] = useState('');
   const [domainSaving, setDomainSaving] = useState(false);
   const [domainSaved, setDomainSaved] = useState(false);
+
+  // All Claude Code built-in tools
+  const ALL_TOOLS = useMemo(() => [
+    { name: 'Bash', description: t('config.toolBash') },
+    { name: 'Read', description: t('config.toolRead') },
+    { name: 'Write', description: t('config.toolWrite') },
+    { name: 'Edit', description: t('config.toolEdit') },
+    { name: 'Glob', description: t('config.toolGlob') },
+    { name: 'Grep', description: t('config.toolGrep') },
+    { name: 'WebFetch', description: t('config.toolFetch') },
+    { name: 'WebSearch', description: t('config.toolWebSearch') },
+    { name: 'NotebookEdit', description: t('config.toolNotebook') },
+    { name: 'Task', description: t('config.toolTask') },
+  ], [t]);
+
+  // MCP tools
+  const MCP_TOOLS = useMemo(() => [
+    { name: 'mcp__chrome-devtools__take_screenshot', description: t('config.toolScreenshot') },
+    { name: 'mcp__chrome-devtools__navigate_page', description: t('config.toolMcpNavigate') },
+    { name: 'mcp__chrome-devtools__click', description: t('config.toolClick') },
+    { name: 'mcp__chrome-devtools__fill', description: t('config.toolMcpFill') },
+    { name: 'mcp__chrome-devtools__take_snapshot', description: t('config.toolMcpSnapshot') },
+    { name: 'mcp__chrome-devtools__evaluate_script', description: t('config.toolMcpJsEval') },
+  ], [t]);
+
+  const TOKENS: TokenConfig[] = useMemo(() => [
+    { key: 'token_github', label: t('config.githubToken'), placeholder: 'ghp_xxxx or github_pat_xxxx' },
+  ], [t]);
 
   const fetchSettings = useCallback(async () => {
     const data = await api.get<Record<string, any>>('/settings');
@@ -282,17 +285,17 @@ export default function ConfigPage() {
         <div className="p-6 max-w-3xl mx-auto">
           <div className="flex items-center gap-3 mb-8">
             <Settings size={22} className="text-accent-400" />
-            <h1 className="text-xl font-bold text-white">Configuration</h1>
+            <h1 className="text-xl font-bold text-white">{t('config.title')}</h1>
           </div>
 
           {/* Theme Color */}
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Palette size={16} className="text-gray-400" />
-              <h2 className="text-base font-semibold text-white">Theme Color</h2>
+              <h2 className="text-base font-semibold text-white">{t('config.themeColor')}</h2>
             </div>
             <p className="text-sm text-gray-500 mb-4">
-              Choose an accent color for the interface.
+              {t('config.themeColorDesc')}
             </p>
             <div className="flex flex-wrap gap-3">
               {colorNames.map((name) => {
@@ -318,15 +321,38 @@ export default function ConfigPage() {
             </div>
           </section>
 
+          {/* Language */}
+          <section className="mb-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe size={16} className="text-gray-400" />
+              <h2 className="text-base font-semibold text-white">{t('language.label')}</h2>
+            </div>
+            <div className="flex gap-2">
+              {(['en', 'ja'] as const).map((lng) => (
+                <button
+                  key={lng}
+                  onClick={() => i18n.changeLanguage(lng)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    i18n.language === lng || (lng === 'ja' && !['en', 'ja'].includes(i18n.language))
+                      ? 'bg-accent-600 text-white'
+                      : 'bg-[#161b22] border border-gray-700/50 text-gray-400 hover:text-gray-200'
+                  }`}
+                >
+                  {t(`language.${lng}`)}
+                </button>
+              ))}
+            </div>
+          </section>
+
           {/* Platform Settings (admin only) */}
           {role === 'admin' && (
             <section className="mb-10">
               <div className="flex items-center gap-2 mb-4">
                 <Globe size={16} className="text-gray-400" />
-                <h2 className="text-base font-semibold text-white">Platform</h2>
+                <h2 className="text-base font-semibold text-white">{t('config.platform')}</h2>
               </div>
               <p className="text-sm text-gray-500 mb-5">
-                Configure platform-wide settings. The base domain is used for project subdomain URLs.
+                {t('config.platformDomainDesc')}
               </p>
               <div className="flex gap-2">
                 <input
@@ -342,11 +368,11 @@ export default function ConfigPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 rounded-md text-sm text-white font-medium transition-colors"
                 >
                   {domainSaved ? <Check size={14} /> : <Save size={14} />}
-                  {domainSaved ? 'Saved' : domainSaving ? 'Saving...' : 'Save'}
+                  {domainSaved ? t('common.saved') : domainSaving ? t('common.saving') : t('common.save')}
                 </button>
               </div>
               <p className="text-xs text-gray-600 mt-2">
-                Projects will be accessible at &lt;project-name&gt;.{baseDomain || 'example.com'}
+                {t('config.domainHint', { domain: baseDomain || 'example.com' })}
               </p>
             </section>
           )}
@@ -355,20 +381,20 @@ export default function ConfigPage() {
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Cpu size={16} className="text-gray-400" />
-              <h2 className="text-base font-semibold text-white">Model</h2>
+              <h2 className="text-base font-semibold text-white">{t('config.model')}</h2>
             </div>
             <p className="text-sm text-gray-500 mb-5">
-              Set the default model and thinking mode for new messages. These can be overridden per-message in the chat input.
+              {t('config.modelDesc')}
             </p>
 
             {/* Model selection */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Default Model</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.defaultModel')}</label>
               <div className="flex gap-2">
                 {[
-                  { value: 'haiku', label: 'Haiku', desc: 'Fast & light' },
-                  { value: 'sonnet', label: 'Sonnet', desc: 'Balanced' },
-                  { value: 'opus', label: 'Opus', desc: 'Most capable' },
+                  { value: 'haiku', label: t('models.haiku'), desc: t('config.fastModel') },
+                  { value: 'sonnet', label: t('models.sonnet'), desc: t('config.balancedModel') },
+                  { value: 'opus', label: t('models.opus'), desc: t('config.capableModel') },
                 ].map(m => (
                   <button
                     key={m.value}
@@ -388,7 +414,7 @@ export default function ConfigPage() {
 
             {/* Thinking toggle */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Extended Thinking</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('thinking.label')}</label>
               <button
                 onClick={() => setDefaultThinking(!defaultThinking)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg border w-full text-left transition-colors ${
@@ -399,20 +425,20 @@ export default function ConfigPage() {
               >
                 {defaultThinking ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
                 <div>
-                  <div className="text-sm font-medium">{defaultThinking ? 'Thinking Enabled' : 'Thinking Disabled'}</div>
-                  <div className="text-xs text-gray-600 mt-0.5">Extended reasoning before responding — uses more tokens but produces higher quality answers</div>
+                  <div className="text-sm font-medium">{defaultThinking ? t('thinking.enabled') : t('thinking.disabled')}</div>
+                  <div className="text-xs text-gray-600 mt-0.5">{t('thinking.detail')}</div>
                 </div>
               </button>
             </div>
 
             {/* Default Mode */}
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Default Mode</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.defaultMode')}</label>
               <div className="flex gap-2">
                 {([
-                  { value: 'execute' as PermissionMode, label: 'Execute', desc: 'Full autonomous', icon: Zap },
-                  { value: 'ask' as PermissionMode, label: 'Ask', desc: 'Confirms edits', icon: MessageSquare },
-                  { value: 'explore' as PermissionMode, label: 'Explore', desc: 'Read-only', icon: Eye },
+                  { value: 'execute' as PermissionMode, label: t('modes.execute'), desc: t('config.fullAutonomous'), icon: Zap },
+                  { value: 'ask' as PermissionMode, label: t('modes.ask'), desc: t('config.confirmsEdits'), icon: MessageSquare },
+                  { value: 'explore' as PermissionMode, label: t('modes.explore'), desc: t('config.readOnly'), icon: Eye },
                 ]).map(m => {
                   const Icon = m.icon;
                   return (
@@ -442,7 +468,7 @@ export default function ConfigPage() {
               className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 rounded-md text-sm text-white font-medium transition-colors"
             >
               {modelSaved ? <Check size={14} /> : <Save size={14} />}
-              {modelSaved ? 'Saved' : modelSaving ? 'Saving...' : 'Save Model Config'}
+              {modelSaved ? t('common.saved') : modelSaving ? t('common.saving') : t('config.saveModelConfig')}
             </button>
           </section>
 
@@ -450,18 +476,18 @@ export default function ConfigPage() {
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Shield size={16} className="text-gray-400" />
-              <h2 className="text-base font-semibold text-white">Tools Configuration</h2>
+              <h2 className="text-base font-semibold text-white">{t('config.tools')}</h2>
             </div>
             <p className="text-sm text-gray-500 mb-5">
-              Control which tools Claude agents can use. Changes apply to new chat messages.
+              {t('config.toolsDesc')}
             </p>
 
             {/* Mode selector */}
             <div className="flex gap-2 mb-5">
               {[
-                { key: 'all' as const, label: 'All Tools Enabled' },
-                { key: 'allowed' as const, label: 'Allowlist' },
-                { key: 'disallowed' as const, label: 'Blocklist' },
+                { key: 'all' as const, label: t('config.allToolsEnabled') },
+                { key: 'allowed' as const, label: t('config.allowlist') },
+                { key: 'disallowed' as const, label: t('config.blocklist') },
               ].map(mode => (
                 <button
                   key={mode.key}
@@ -479,7 +505,7 @@ export default function ConfigPage() {
 
             {toolMode === 'all' && (
               <div className="bg-[#161b22] border border-gray-800/60 rounded-lg p-4 mb-4">
-                <p className="text-sm text-gray-400">All built-in and MCP tools are enabled. The agent has full access.</p>
+                <p className="text-sm text-gray-400">{t('config.allToolsDesc')}</p>
               </div>
             )}
 
@@ -487,13 +513,13 @@ export default function ConfigPage() {
               <>
                 <p className="text-xs text-gray-500 mb-3">
                   {toolMode === 'allowed'
-                    ? 'Only checked tools will be available to the agent. Everything else is blocked.'
-                    : 'Checked tools will be blocked. Everything else is allowed.'}
+                    ? t('config.allowlistDesc')
+                    : t('config.blocklistDesc')}
                 </p>
 
                 {/* Built-in tools */}
                 <div className="mb-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Built-in Tools</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.builtInTools')}</h3>
                   <div className="bg-[#161b22] border border-gray-800/60 rounded-lg divide-y divide-gray-800/40">
                     {ALL_TOOLS.map(tool => (
                       <label
@@ -521,7 +547,7 @@ export default function ConfigPage() {
 
                 {/* MCP tools */}
                 <div className="mb-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Chrome DevTools (MCP)</h3>
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.chromeDevTools')}</h3>
                   <div className="bg-[#161b22] border border-gray-800/60 rounded-lg divide-y divide-gray-800/40">
                     {MCP_TOOLS.map(tool => (
                       <label
@@ -553,7 +579,7 @@ export default function ConfigPage() {
                     value={customTool}
                     onChange={(e) => setCustomTool(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addCustomTool()}
-                    placeholder="Add custom tool pattern (e.g. Bash(git:*))"
+                    placeholder={t('config.addCustomToolPlaceholder')}
                     className="flex-1 bg-[#161b22] border border-gray-800/60 rounded-md px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-accent-500/50"
                   />
                   <button
@@ -566,17 +592,17 @@ export default function ConfigPage() {
                 </div>
 
                 {/* Custom entries */}
-                {activeList.filter(t => !ALL_TOOLS.some(at => at.name === t) && !MCP_TOOLS.some(mt => mt.name === t)).length > 0 && (
+                {activeList.filter(item => !ALL_TOOLS.some(at => at.name === item) && !MCP_TOOLS.some(mt => mt.name === item)).length > 0 && (
                   <div className="mb-4">
-                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Custom Patterns</h3>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.customPatterns')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {activeList
-                        .filter(t => !ALL_TOOLS.some(at => at.name === t) && !MCP_TOOLS.some(mt => mt.name === t))
-                        .map(t => (
-                          <span key={t} className="flex items-center gap-1.5 px-2.5 py-1 bg-[#161b22] border border-gray-800/60 rounded-md text-sm font-mono text-gray-300">
-                            {t}
+                        .filter(tool => !ALL_TOOLS.some(at => at.name === tool) && !MCP_TOOLS.some(mt => mt.name === tool))
+                        .map(tool => (
+                          <span key={tool} className="flex items-center gap-1.5 px-2.5 py-1 bg-[#161b22] border border-gray-800/60 rounded-md text-sm font-mono text-gray-300">
+                            {tool}
                             <button
-                              onClick={() => toggleTool(t, activeToggle)}
+                              onClick={() => toggleTool(tool, activeToggle)}
                               className="text-gray-600 hover:text-red-400"
                             >
                               <X size={12} />
@@ -595,7 +621,7 @@ export default function ConfigPage() {
               className="flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 rounded-md text-sm text-white font-medium transition-colors"
             >
               {saved ? <Check size={14} /> : <Save size={14} />}
-              {saved ? 'Saved' : saving ? 'Saving...' : 'Save Tools Config'}
+              {saved ? t('common.saved') : saving ? t('common.saving') : t('config.saveToolsConfig')}
             </button>
           </section>
 
@@ -603,10 +629,10 @@ export default function ConfigPage() {
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Key size={16} className="text-gray-400" />
-              <h2 className="text-base font-semibold text-white">Tokens & API Keys</h2>
+              <h2 className="text-base font-semibold text-white">{t('config.tokens')}</h2>
             </div>
             <p className="text-sm text-gray-500 mb-5">
-              Tokens are encrypted at rest using AES-256. They are never exposed in the API — only masked previews are shown.
+              {t('config.tokensDesc')}
             </p>
 
             <div className="space-y-4">
@@ -619,7 +645,7 @@ export default function ConfigPage() {
                       <h3 className="text-sm font-medium text-gray-200">{token.label}</h3>
                       {hasValue && (
                         <span className="flex items-center gap-1.5 text-xs text-emerald-400">
-                          <Check size={12} /> Configured
+                          <Check size={12} /> {t('common.configured')}
                         </span>
                       )}
                     </div>
@@ -632,7 +658,7 @@ export default function ConfigPage() {
                         <button
                           onClick={() => handleDeleteToken(token.key)}
                           className="text-gray-600 hover:text-red-400 transition-colors"
-                          title="Remove token"
+                          title={t('config.removeToken')}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -645,7 +671,7 @@ export default function ConfigPage() {
                           type={showToken[token.key] ? 'text' : 'password'}
                           value={tokenInputs[token.key] || ''}
                           onChange={(e) => setTokenInputs(prev => ({ ...prev, [token.key]: e.target.value }))}
-                          placeholder={hasValue ? 'Enter new token to replace' : token.placeholder}
+                          placeholder={hasValue ? t('config.enterNewToken') : token.placeholder}
                           className="w-full bg-[#0d1117] border border-gray-800/60 rounded-md px-3 py-2 pr-10 text-sm text-white placeholder-gray-600 font-mono focus:outline-none focus:border-accent-500/50"
                         />
                         <button
@@ -673,18 +699,18 @@ export default function ConfigPage() {
           <section className="mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Phone size={16} className="text-green-400" />
-              <h2 className="text-base font-semibold text-white">WhatsApp</h2>
+              <h2 className="text-base font-semibold text-white">{t('config.whatsapp')}</h2>
             </div>
             <p className="text-sm text-gray-500 mb-5">
               {role === 'admin'
-                ? 'Connect WhatsApp to allow users to chat with agents. Set your phone number to receive messages.'
-                : 'Set your phone number to receive WhatsApp messages from agents.'}
+                ? t('config.whatsappDescAdmin')
+                : t('config.whatsappDescUser')}
             </p>
 
             <div className="bg-[#161b22] border border-gray-800/60 rounded-lg p-5 space-y-5">
               {/* Phone Number Input - for all users */}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Your Phone Number</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t('config.yourPhoneNumber')}</label>
                 <div className="flex gap-3">
                   <input
                     type="text"
@@ -699,11 +725,11 @@ export default function ConfigPage() {
                     className="px-3 py-2 bg-accent-600 hover:bg-accent-500 disabled:opacity-50 rounded-md text-sm text-white flex items-center gap-2"
                   >
                     {phoneSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                    {phoneSaved ? 'Saved!' : 'Save'}
+                    {phoneSaved ? t('common.saved') : t('common.save')}
                   </button>
                 </div>
                 <p className="text-xs text-gray-600 mt-1.5">
-                  Enter phone (e.g., 38160123456) or WhatsApp LID. Check server logs for your LID when messaging.
+                  {t('config.phoneHint')}
                 </p>
               </div>
 
@@ -711,7 +737,7 @@ export default function ConfigPage() {
               {role === 'admin' && (
                 <>
                   <div className="border-t border-gray-800/60 pt-5">
-                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Connection Status</label>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{t('config.connectionStatus')}</label>
 
                     {waError && (
                       <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400">
@@ -724,14 +750,14 @@ export default function ConfigPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                           <div>
-                            <div className="text-sm font-medium text-green-400">Connected</div>
+                            <div className="text-sm font-medium text-green-400">{t('common.connected')}</div>
                             {waStatus.phoneNumber && (
                               <div className="text-xs text-gray-500">+{waStatus.phoneNumber}</div>
                             )}
                           </div>
                         </div>
                         <p className="text-xs text-gray-500">
-                          WhatsApp is connected. Messages are routed to users based on their registered phone number.
+                          {t('config.whatsappConnectedDesc')}
                         </p>
                         <button
                           onClick={handleWhatsAppDisconnect}
@@ -739,39 +765,39 @@ export default function ConfigPage() {
                           className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 border border-red-600/30 rounded-md text-sm text-red-400 font-medium transition-colors disabled:opacity-50"
                         >
                           {waLoading ? <Loader2 size={14} className="animate-spin" /> : <PowerOff size={14} />}
-                          Disconnect
+                          {t('common.disconnect')}
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 bg-gray-600 rounded-full" />
-                          <div className="text-sm text-gray-400">Not connected</div>
+                          <div className="text-sm text-gray-400">{t('common.notConnected')}</div>
                         </div>
 
                     {waQrImage ? (
                       <div className="space-y-3">
                         <p className="text-xs text-gray-500">
-                          Scan this QR code with WhatsApp on your phone to connect:
+                          {t('config.scanQrCode')}:
                         </p>
                         <div className="bg-white p-4 rounded-lg inline-block">
                           <img src={waQrImage} alt="WhatsApp QR Code" className="w-64 h-64" />
                         </div>
                         <p className="text-xs text-gray-600">
-                          Open WhatsApp &gt; Settings &gt; Linked Devices &gt; Link a Device
+                          {t('config.qrInstructions')}
                         </p>
                         <button
                           onClick={fetchWhatsAppStatus}
                           className="flex items-center gap-2 px-3 py-1.5 bg-[#0d1117] border border-gray-800/60 rounded-md text-xs text-gray-400 hover:text-gray-300 transition-colors"
                         >
                           <RefreshCw size={12} />
-                          Refresh
+                          {t('common.refresh')}
                         </button>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <p className="text-xs text-gray-500">
-                          Start the WhatsApp connection process to receive a QR code.
+                          {t('config.whatsappStartDesc')}
                         </p>
                         <button
                           onClick={handleWhatsAppInit}
@@ -779,7 +805,7 @@ export default function ConfigPage() {
                           className="flex items-center gap-2 px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-600/30 rounded-md text-sm text-green-400 font-medium transition-colors disabled:opacity-50"
                         >
                           {waLoading ? <Loader2 size={14} className="animate-spin" /> : <Power size={14} />}
-                          Initialize WhatsApp
+                          {t('config.initWhatsApp')}
                         </button>
                       </div>
                     )}

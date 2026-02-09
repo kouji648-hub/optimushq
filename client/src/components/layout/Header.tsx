@@ -1,14 +1,8 @@
 import React from 'react';
 import { Brain, Download, Settings, MessageSquare, FolderTree, GitBranch, Menu, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useMobileSidebar } from './MobileSidebar';
 import type { Agent, SessionStatus } from '../../../../shared/types';
-
-const STATUS_OPTIONS: { key: SessionStatus; label: string; color: string }[] = [
-  { key: 'backlog', label: 'Backlog', color: 'bg-gray-500' },
-  { key: 'in_progress', label: 'In Progress', color: 'bg-accent-500' },
-  { key: 'review', label: 'Review', color: 'bg-blue-500' },
-  { key: 'done', label: 'Done', color: 'bg-emerald-500' },
-];
 
 interface Props {
   agents: Agent[];
@@ -32,6 +26,15 @@ export default function Header({
   sessionStatus, onStatusChange,
   activeView = 'chat', onToggleView, hasProject, projectPath,
 }: Props) {
+  const { t } = useTranslation();
+
+  const STATUS_OPTIONS: { key: SessionStatus; label: string; color: string }[] = [
+    { key: 'backlog', label: t('header.backlog'), color: 'bg-gray-500' },
+    { key: 'in_progress', label: t('header.inProgress'), color: 'bg-accent-500' },
+    { key: 'review', label: t('header.review'), color: 'bg-blue-500' },
+    { key: 'done', label: t('header.done'), color: 'bg-emerald-500' },
+  ];
+
   const currentStatus = STATUS_OPTIONS.find(s => s.key === sessionStatus) || STATUS_OPTIONS[0];
   const { setSidebarOpen } = useMobileSidebar();
 
@@ -56,7 +59,7 @@ export default function Header({
               onClick={() => onToggleView('chat')}
             >
               <MessageSquare size={13} />
-              Chat
+              {t('header.chatTab')}
             </button>
             <button
               className={`flex items-center gap-1.5 px-2.5 py-1 text-xs transition-colors ${
@@ -65,7 +68,7 @@ export default function Header({
               onClick={() => onToggleView('files')}
             >
               <FolderTree size={13} />
-              Files
+              {t('header.filesTab')}
             </button>
             <button
               className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-r transition-colors ${
@@ -74,7 +77,7 @@ export default function Header({
               onClick={() => onToggleView('source_control')}
             >
               <GitBranch size={13} />
-              Source Control
+              {t('header.sourceControlTab')}
             </button>
           </div>
         )}
@@ -119,7 +122,7 @@ export default function Header({
               title={`https://${folder}.wpgens.com`}
             >
               <ExternalLink size={13} />
-              <span className="hidden sm:inline">Demo</span>
+              <span className="hidden sm:inline">{t('header.demoTitle')}</span>
             </a>
           ) : null;
         })()}
@@ -127,13 +130,13 @@ export default function Header({
 
       {sessionId && (
         <div className="flex items-center gap-2">
-          <button onClick={onToggleSkills} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title="Skills">
+          <button onClick={onToggleSkills} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title={t('header.skillsTitle')}>
             <Settings size={16} />
           </button>
-          <button onClick={onToggleMemory} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title="Memory">
+          <button onClick={onToggleMemory} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title={t('header.memoryTitle')}>
             <Brain size={16} />
           </button>
-          <button onClick={onExport} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title="Export">
+          <button onClick={onExport} className="text-gray-500 hover:text-gray-300 p-1 transition-colors" title={t('header.exportTitle')}>
             <Download size={16} />
           </button>
         </div>

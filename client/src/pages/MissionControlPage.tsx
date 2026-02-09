@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api } from '../api/http';
 import PageShell from '../components/layout/PageShell';
 import type { Session, Project, ActivityLog, SessionStatus } from '../../../shared/types';
@@ -8,30 +9,6 @@ import {
   MessageCircle, GripVertical, ChevronDown, ChevronUp
 } from 'lucide-react';
 
-const COLUMNS: { key: SessionStatus; label: string; color: string; dotColor: string; bgColor: string }[] = [
-  { key: 'backlog', label: 'Backlog', color: 'text-gray-400', dotColor: 'bg-gray-400', bgColor: 'bg-gray-400/10' },
-  { key: 'in_progress', label: 'In Progress', color: 'text-accent-400', dotColor: 'bg-accent-400', bgColor: 'bg-accent-400/10' },
-  { key: 'review', label: 'Review', color: 'text-blue-400', dotColor: 'bg-blue-400', bgColor: 'bg-blue-400/10' },
-  { key: 'done', label: 'Done', color: 'text-emerald-400', dotColor: 'bg-emerald-400', bgColor: 'bg-emerald-400/10' },
-];
-
-function timeAgo(dateStr: string): string {
-  const d = new Date(dateStr + 'Z');
-  const now = new Date();
-  const diff = now.getTime() - d.getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
-}
-
-function statusLabel(s: string): string {
-  return s === 'in_progress' ? 'In Progress' : s.charAt(0).toUpperCase() + s.slice(1);
-}
-
 interface KanbanCardProps {
   session: Session & { project_name?: string; project_color?: string };
   onMove: (id: string, status: SessionStatus) => void;
@@ -39,11 +16,11 @@ interface KanbanCardProps {
   onClick: (id: string) => void;
 }
 
-function KanbanCard({ session, onMove, onDragStart, onClick, generalProjectId }: KanbanCardProps & { generalProjectId: string | null }) {
+function KanbanCard({ session, onMove, onDragStart, onClick, generalProjectId, columns, timeAgo }: KanbanCardProps & { generalProjectId: string | null; columns: { key: SessionStatus; label: string; color: string; dotColor: string; bgColor: string }[]; timeAgo: (dateStr: string) => string }) {
   const isGeneral = generalProjectId && session.project_id === generalProjectId;
-  const colIdx = COLUMNS.findIndex(c => c.key === session.status);
+  const colIdx = columns.findIndex(c => c.key === session.status);
   const canMoveLeft = colIdx > 0;
-  const canMoveRight = colIdx < COLUMNS.length - 1;
+  const canMoveRight = colIdx < columns.length - 1;
 
   return (
     <div
@@ -72,18 +49,18 @@ function KanbanCard({ session, onMove, onDragStart, onClick, generalProjectId }:
         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
           {canMoveLeft && (
             <button
-              onClick={() => onMove(session.id, COLUMNS[colIdx - 1].key)}
+              onClick={() => onMove(session.id, columns[colIdx - 1].key)}
               className="p-1 text-gray-500 hover:text-gray-300 rounded hover:bg-gray-800/50"
-              title={`Move to ${COLUMNS[colIdx - 1].label}`}
+              title={`Move to ${columns[colIdx - 1].label}`}
             >
               <ArrowRight size={12} className="rotate-180" />
             </button>
           )}
           {canMoveRight && (
             <button
-              onClick={() => onMove(session.id, COLUMNS[colIdx + 1].key)}
+              onClick={() => onMove(session.id, columns[colIdx + 1].key)}
               className="p-1 text-gray-500 hover:text-gray-300 rounded hover:bg-gray-800/50"
-              title={`Move to ${COLUMNS[colIdx + 1].label}`}
+              title={`Move to ${columns[colIdx + 1].label}`}
             >
               <ArrowRight size={12} />
             </button>
@@ -99,6 +76,7 @@ function KanbanCard({ session, onMove, onDragStart, onClick, generalProjectId }:
 }
 
 export default function MissionControlPage() {
+  const { t } = useTranslation();
   const [sessions, setSessions] = useState<(Session & { project_name?: string; project_color?: string })[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activity, setActivity] = useState<ActivityLog[]>([]);
@@ -107,6 +85,34 @@ export default function MissionControlPage() {
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
   const [generalProjectId, setGeneralProjectId] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  const COLUMNS: { key: SessionStatus; label: string; color: string; dotColor: string; bgColor: string }[] = [
+    { key: 'backlog', label: t('header.backlog'), color: 'text-gray-400', dotColor: 'bg-gray-400', bgColor: 'bg-gray-400/10' },
+    { key: 'in_progress', label: t('header.inProgress'), color: 'text-accent-400', dotColor: 'bg-accent-400', bgColor: 'bg-accent-400/10' },
+    { key: 'review', label: t('header.review'), color: 'text-blue-400', dotColor: 'bg-blue-400', bgColor: 'bg-blue-400/10' },
+    { key: 'done', label: t('header.done'), color: 'text-emerald-400', dotColor: 'bg-emerald-400', bgColor: 'bg-emerald-400/10' },
+  ];
+
+  function timeAgo(dateStr: string): string {
+    const d = new Date(dateStr + 'Z');
+    const now = new Date();
+    const diff = now.getTime() - d.getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t('common.justNow');
+    if (mins < 60) return t('common.minutesAgo', { count: mins });
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return t('common.hoursAgo', { count: hrs });
+    const days = Math.floor(hrs / 24);
+    return t('common.daysAgo', { count: days });
+  }
+
+  function statusLabel(s: string): string {
+    if (s === 'backlog') return t('header.backlog');
+    if (s === 'in_progress') return t('header.inProgress');
+    if (s === 'review') return t('header.review');
+    if (s === 'done') return t('header.done');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
 
   const fetchAll = useCallback(async () => {
     const [sessData, projData, actData, configData] = await Promise.all([
@@ -183,7 +189,7 @@ export default function MissionControlPage() {
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800/50">
           <div className="flex items-center gap-3">
             <LayoutGrid size={20} className="text-accent-400" />
-            <h1 className="text-lg font-bold text-white">Tasks</h1>
+            <h1 className="text-lg font-bold text-white">{t('missionControl.title')}</h1>
           </div>
           <div className="flex items-center gap-3">
             {/* Project Filter */}
@@ -194,7 +200,7 @@ export default function MissionControlPage() {
                 onChange={(e) => setFilterProject(e.target.value)}
                 className="bg-[#161b22] border border-gray-800/60 rounded-md px-2.5 py-1.5 text-sm text-gray-300 focus:outline-none focus:border-accent-500/50"
               >
-                <option value="all">All Projects</option>
+                <option value="all">{t('missionControl.allProjects')}</option>
                 {projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
@@ -207,7 +213,7 @@ export default function MissionControlPage() {
                 showActivity ? 'bg-accent-600/20 text-accent-400 border border-accent-600/30' : 'bg-[#161b22] text-gray-400 border border-gray-800/60 hover:text-gray-300'
               }`}
             >
-              <Activity size={14} /> Activity
+              <Activity size={14} /> {t('missionControl.activity')}
             </button>
           </div>
         </div>
@@ -248,11 +254,13 @@ export default function MissionControlPage() {
                         onDragStart={handleDragStart}
                         onClick={handleCardClick}
                         generalProjectId={generalProjectId}
+                        columns={COLUMNS}
+                        timeAgo={timeAgo}
                       />
                     ))}
                     {colSessions.length === 0 && (
                       <div className="text-center py-8 text-gray-700 text-xs">
-                        {dragOverCol === col.key ? 'Drop here' : 'No tasks'}
+                        {dragOverCol === col.key ? t('missionControl.dropHere') : t('missionControl.noTasks')}
                       </div>
                     )}
                   </div>
@@ -266,14 +274,14 @@ export default function MissionControlPage() {
             <div className="w-72 border-l border-gray-800/50 flex flex-col bg-[#0d1117]">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-800/50">
                 <Activity size={14} className="text-gray-500" />
-                <span className="text-sm font-semibold text-gray-300">Activity</span>
+                <span className="text-sm font-semibold text-gray-300">{t('missionControl.activity')}</span>
               </div>
               <div className="flex-1 overflow-y-auto p-3 space-y-1">
                 {activity.map((a) => (
                   <div key={a.id} className="px-3 py-2 rounded-md hover:bg-[#161b22] transition-colors">
                     <div className="text-xs text-gray-400">
                       <span className={a.actor === 'ai' ? 'text-blue-400' : 'text-accent-400'}>
-                        {a.actor === 'ai' ? 'AI' : 'You'}
+                        {a.actor === 'ai' ? t('common.ai') : t('common.you')}
                       </span>
                       {' '}{a.action}{' '}
                       <span className="text-gray-300 font-medium">{a.session_title}</span>
@@ -289,7 +297,7 @@ export default function MissionControlPage() {
                   </div>
                 ))}
                 {activity.length === 0 && (
-                  <div className="text-center py-8 text-gray-700 text-xs">No activity yet</div>
+                  <div className="text-center py-8 text-gray-700 text-xs">{t('missionControl.noActivity')}</div>
                 )}
               </div>
             </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Settings } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Skill } from '../../../../shared/types';
 
 interface SessionSkill extends Skill {
@@ -12,11 +13,13 @@ interface Props {
 }
 
 export default function SkillToggleList({ skills, onToggle }: Props) {
+  const { t } = useTranslation();
+
   if (skills.length === 0) {
     return (
       <div className="p-4 text-gray-500 text-sm">
         <Settings size={24} className="mx-auto mb-2 opacity-50" />
-        <p className="text-center">No skills available</p>
+        <p className="text-center">{t('skills.noSkillsAvailable')}</p>
       </div>
     );
   }
@@ -50,17 +53,17 @@ export default function SkillToggleList({ skills, onToggle }: Props) {
   return (
     <div className="p-4">
       <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-        <Settings size={16} /> Session Skills
+        <Settings size={16} /> {t('header.skillsTitle')}
       </h3>
       {globalSkills.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">Global</p>
+          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">{t('common.global')}</p>
           <div className="space-y-1">{globalSkills.map(renderSkill)}</div>
         </div>
       )}
       {projectSkills.length > 0 && (
         <div>
-          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">Project</p>
+          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">{t('common.project')}</p>
           <div className="space-y-1">{projectSkills.map(renderSkill)}</div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronRight, ChevronDown, Folder, FolderOpen, File, FileCode } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { TreeNode } from '../../hooks/useFiles';
 
 const CODE_EXTENSIONS = new Set([
@@ -86,6 +87,7 @@ interface Props {
 }
 
 export default function FileTree({ tree, activeFile, onSelectFile, onCreateItem, onDeleteItem }: Props) {
+  const { t } = useTranslation();
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -142,7 +144,7 @@ export default function FileTree({ tree, activeFile, onSelectFile, onCreateItem,
       ))}
       {tree.length === 0 && (
         <div className="text-gray-600 text-xs px-4 py-8 text-center">
-          No files found
+          {t('files.noFiles')}
         </div>
       )}
 
@@ -156,13 +158,13 @@ export default function FileTree({ tree, activeFile, onSelectFile, onCreateItem,
             className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700/50"
             onClick={() => menuAction('new-file')}
           >
-            New File
+            {t('files.newFile')}
           </button>
           <button
             className="w-full text-left px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-700/50"
             onClick={() => menuAction('new-folder')}
           >
-            New Folder
+            {t('files.newFolder')}
           </button>
           {contextMenu.node && (
             <>
@@ -171,7 +173,7 @@ export default function FileTree({ tree, activeFile, onSelectFile, onCreateItem,
                 className="w-full text-left px-3 py-1.5 text-xs text-red-400 hover:bg-gray-700/50"
                 onClick={() => menuAction('delete')}
               >
-                Delete
+                {t('common.delete')}
               </button>
             </>
           )}

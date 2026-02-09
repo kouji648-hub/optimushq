@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Save, X, Power, PowerOff, Send, Loader } from 'lucide-react';
 import { api } from '../../api/http';
 import type { McpServer, Agent, Session } from '../../../../shared/types';
@@ -14,6 +15,7 @@ interface Props {
 const emptyForm = { name: '', description: '', command: '', args: '', env: '' };
 
 export default function McpManager({ mcps, onCreate, onUpdate, onDelete }: Props) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -132,20 +134,20 @@ User request: ${importInput.trim()}`;
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-white">MCP Servers</h2>
-          <p className="text-xs text-gray-500 mt-1">Model Context Protocol servers provide tools to Claude agents</p>
+          <h2 className="text-xl font-bold text-white">{t('mcps.title')}</h2>
+          <p className="text-xs text-gray-500 mt-1">{t('mcps.subtitle')}</p>
         </div>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm(emptyForm); }}
           className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
         >
-          <Plus size={14} /> Add MCP
+          <Plus size={14} /> {t('mcps.addMcp')}
         </button>
       </div>
 
       {/* Import via chat */}
       <div className="mb-6 p-4 bg-[#161b22] rounded-lg border border-gray-700/50">
-        <label className="block text-xs text-gray-400 mb-2">Import MCP</label>
+        <label className="block text-xs text-gray-400 mb-2">{t('mcps.importMcp')}</label>
         <div className="flex gap-2">
           <textarea
             value={importInput}
@@ -169,7 +171,7 @@ User request: ${importInput.trim()}`;
         <div className="mb-6 p-4 bg-[#161b22] rounded-lg border border-gray-700/50 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Name</label>
+              <label className="block text-xs text-gray-400 mb-1">{t('common.name')}</label>
               <input
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -178,7 +180,7 @@ User request: ${importInput.trim()}`;
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Command</label>
+              <label className="block text-xs text-gray-400 mb-1">{t('mcps.command')}</label>
               <input
                 value={form.command}
                 onChange={(e) => setForm({ ...form, command: e.target.value })}
@@ -189,17 +191,17 @@ User request: ${importInput.trim()}`;
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Description</label>
+            <label className="block text-xs text-gray-400 mb-1">{t('common.description')}</label>
             <input
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              placeholder="What does this MCP server do?"
+              placeholder={t('common.description')}
               className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
             />
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Arguments (one per line)</label>
+            <label className="block text-xs text-gray-400 mb-1">{t('mcps.arguments')}</label>
             <textarea
               value={form.args}
               onChange={(e) => setForm({ ...form, args: e.target.value })}
@@ -210,7 +212,7 @@ User request: ${importInput.trim()}`;
           </div>
 
           <div>
-            <label className="block text-xs text-gray-400 mb-1">Environment variables (KEY=value, one per line)</label>
+            <label className="block text-xs text-gray-400 mb-1">{t('mcps.envVars')}</label>
             <textarea
               value={form.env}
               onChange={(e) => setForm({ ...form, env: e.target.value })}
@@ -225,13 +227,13 @@ User request: ${importInput.trim()}`;
               onClick={editingId ? handleUpdate : handleCreate}
               className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
             >
-              <Save size={14} /> {editingId ? 'Update' : 'Create'}
+              <Save size={14} /> {editingId ? t('common.update') : t('common.create')}
             </button>
             <button
               onClick={() => { setShowCreate(false); setEditingId(null); }}
               className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300"
             >
-              <X size={14} /> Cancel
+              <X size={14} /> {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -245,8 +247,8 @@ User request: ${importInput.trim()}`;
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-white">{m.name}</span>
-                {m.is_default ? <span className="text-xs bg-accent-600/30 text-accent-400 px-1.5 py-0.5 rounded">default</span> : null}
-                {!m.enabled && <span className="text-xs bg-gray-700/50 text-gray-500 px-1.5 py-0.5 rounded">disabled</span>}
+                {m.is_default ? <span className="text-xs bg-accent-600/30 text-accent-400 px-1.5 py-0.5 rounded">{t('common.default')}</span> : null}
+                {!m.enabled && <span className="text-xs bg-gray-700/50 text-gray-500 px-1.5 py-0.5 rounded">{t('common.disabled')}</span>}
               </div>
               {m.description && <p className="text-xs text-gray-400 mt-1">{m.description}</p>}
               <div className="text-xs text-gray-600 mt-1.5 font-mono">
@@ -257,7 +259,7 @@ User request: ${importInput.trim()}`;
               <button
                 onClick={() => toggleEnabled(m)}
                 className={`p-1 ${m.enabled ? 'text-green-400 hover:text-red-400' : 'text-gray-500 hover:text-green-400'}`}
-                title={m.enabled ? 'Disable' : 'Enable'}
+                title={m.enabled ? t('common.disable') : t('common.enable')}
               >
                 {m.enabled ? <Power size={14} /> : <PowerOff size={14} />}
               </button>

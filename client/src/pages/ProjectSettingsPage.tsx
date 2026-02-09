@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Check } from 'lucide-react';
 import PageShell from '../components/layout/PageShell';
 import { api } from '../api/http';
@@ -12,6 +13,7 @@ const COLOR_PALETTE = [
 ];
 
 export default function ProjectSettingsPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [project, setProject] = useState<Project | null>(null);
@@ -82,7 +84,7 @@ export default function ProjectSettingsPage() {
     return (
       <PageShell>
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-gray-500 text-sm">Loading...</div>
+          <div className="text-gray-500 text-sm">{t('common.loading')}</div>
         </div>
       </PageShell>
     );
@@ -92,11 +94,11 @@ export default function ProjectSettingsPage() {
     <PageShell>
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto py-10 px-6">
-          <h1 className="text-xl font-bold text-white mb-6">Project Settings</h1>
+          <h1 className="text-xl font-bold text-white mb-6">{t('projectSettings.title')}</h1>
 
           <form onSubmit={handleSave} className="bg-[#161b22] rounded-lg border border-gray-700/50 p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Name</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('common.name')}</label>
               <input
                 type="text"
                 value={name}
@@ -107,7 +109,7 @@ export default function ProjectSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Description</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('common.description')}</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -117,7 +119,7 @@ export default function ProjectSettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1.5">Color</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('common.color')}</label>
               <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
@@ -125,7 +127,7 @@ export default function ProjectSettingsPage() {
                   className={`w-7 h-7 rounded-full border-2 bg-gray-600 flex items-center justify-center transition-colors ${
                     color === '' ? 'border-white' : 'border-transparent hover:border-gray-500'
                   }`}
-                  title="None"
+                  title={t('common.none')}
                 >
                   {color === '' && <Check size={14} className="text-white" />}
                 </button>
@@ -153,12 +155,12 @@ export default function ProjectSettingsPage() {
                 onChange={(e) => setAutoSummarize(e.target.checked)}
                 className="rounded border-gray-600 bg-gray-900 text-accent-500 focus:ring-accent-500/50"
               />
-              <span className="text-sm text-gray-300">Auto-summarize sessions</span>
+              <span className="text-sm text-gray-300">{t('projectSettings.autoSummarize')}</span>
             </label>
 
             {project.path && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Path</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('common.path')}</label>
                 <div className="text-sm text-gray-400 bg-gray-900/50 border border-gray-800 rounded px-3 py-2 font-mono">
                   {project.path}
                 </div>
@@ -167,7 +169,7 @@ export default function ProjectSettingsPage() {
 
             {project.path && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Dev Server Port</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('projectSettings.devPort')}</label>
                 <input
                   type="number"
                   value={devPort}
@@ -177,21 +179,21 @@ export default function ProjectSettingsPage() {
                   max={3999}
                   className="w-40 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50 font-mono"
                 />
-                <p className="text-xs text-gray-500 mt-1">Port for the dev server (3100-3999). The preview URL will proxy to this port when set.</p>
+                <p className="text-xs text-gray-500 mt-1">{t('projectSettings.devPortDesc')}</p>
               </div>
             )}
 
             {project.path && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Server Config</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('projectSettings.serverConfig')}</label>
                 <textarea
                   value={serverConfig}
                   onChange={(e) => setServerConfig(e.target.value)}
                   rows={6}
-                  placeholder={"Start: npm run dev\nDependencies: docker start dzobs-postgres\nHealth check: curl http://localhost:3100/"}
+                  placeholder={t('projectSettings.serverConfigPlaceholder')}
                   className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50 resize-none font-mono"
                 />
-                <p className="text-xs text-gray-500 mt-1">Startup commands, dependencies, and recovery steps. Agents use this to start and recover the dev server.</p>
+                <p className="text-xs text-gray-500 mt-1">{t('projectSettings.serverConfigDesc')}</p>
               </div>
             )}
 
@@ -201,15 +203,15 @@ export default function ProjectSettingsPage() {
                 disabled={saving}
                 className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-4 py-2 rounded transition-colors disabled:opacity-50"
               >
-                {saving ? 'Saving...' : 'Save'}
+                {saving ? t('common.saving') : t('common.save')}
               </button>
-              {saved && <span className="text-sm text-green-400">Saved</span>}
+              {saved && <span className="text-sm text-green-400">{t('common.saved')}</span>}
             </div>
           </form>
 
           {/* Info section */}
           <div className="mt-6 bg-[#161b22] rounded-lg border border-gray-700/50 p-6 space-y-3">
-            <h2 className="text-sm font-medium text-gray-300 mb-3">Info</h2>
+            <h2 className="text-sm font-medium text-gray-300 mb-3">{t('common.info')}</h2>
             <div className="text-xs text-gray-500 space-y-1">
               <div>ID: <span className="text-gray-400 font-mono">{project.id}</span></div>
               <div>Created: <span className="text-gray-400">{new Date(project.created_at).toLocaleString()}</span></div>
@@ -219,8 +221,8 @@ export default function ProjectSettingsPage() {
           {/* Project Memory */}
           {projectMemory && (
             <div className="mt-6 bg-[#161b22] rounded-lg border border-gray-700/50 p-6 space-y-4">
-              <h2 className="text-sm font-medium text-gray-300 mb-3">Project Memory</h2>
-              <p className="text-xs text-gray-500">Shared context visible to Claude across all sessions in this project.</p>
+              <h2 className="text-sm font-medium text-gray-300 mb-3">{t('memory.projectMemory')}</h2>
+              <p className="text-xs text-gray-500">{t('projectSettings.sharedContext')}</p>
 
               <div>
                 {editingMemSummary ? (
@@ -236,13 +238,13 @@ export default function ProjectSettingsPage() {
                         onClick={() => { updateProjectMemory(memSummaryDraft); setEditingMemSummary(false); }}
                         className="bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium px-3 py-1.5 rounded transition-colors"
                       >
-                        Save
+                        {t('common.save')}
                       </button>
                       <button
                         onClick={() => setEditingMemSummary(false)}
                         className="bg-gray-700 hover:bg-gray-600 text-gray-300 text-sm font-medium px-3 py-1.5 rounded transition-colors"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </div>
@@ -251,7 +253,7 @@ export default function ProjectSettingsPage() {
                     onClick={() => { setMemSummaryDraft(projectMemory.summary); setEditingMemSummary(true); }}
                     className="text-sm text-gray-400 bg-gray-900/50 border border-gray-800 rounded px-3 py-2 cursor-pointer hover:text-gray-300 min-h-[2.5em] whitespace-pre-wrap"
                   >
-                    {projectMemory.summary || 'Click to add project memory...'}
+                    {projectMemory.summary || t('projectSettings.clickToAddMemory')}
                   </p>
                 )}
               </div>
@@ -261,10 +263,10 @@ export default function ProjectSettingsPage() {
           {/* Git settings */}
           {project.path && (
             <div className="mt-6 bg-[#161b22] rounded-lg border border-gray-700/50 p-6 space-y-4">
-              <h2 className="text-sm font-medium text-gray-300 mb-3">Source Control</h2>
+              <h2 className="text-sm font-medium text-gray-300 mb-3">{t('projectSettings.sourceControl')}</h2>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Origin URL</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('projectSettings.originUrl')}</label>
                 <input
                   type="text"
                   value={gitOriginUrl}
@@ -272,7 +274,7 @@ export default function ProjectSettingsPage() {
                   placeholder="https://github.com/user/repo.git"
                   className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50 font-mono"
                 />
-                <p className="text-xs text-gray-500 mt-1">Remote repository URL for this project</p>
+                <p className="text-xs text-gray-500 mt-1">{t('projectSettings.originUrlDesc')}</p>
               </div>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -282,11 +284,11 @@ export default function ProjectSettingsPage() {
                   onChange={(e) => setGitPushDisabled(e.target.checked)}
                   className="rounded border-gray-600 bg-gray-900 text-accent-500 focus:ring-accent-500/50"
                 />
-                <span className="text-sm text-gray-300">Disable push (pull-only mode)</span>
+                <span className="text-sm text-gray-300">{t('projectSettings.disablePush')}</span>
               </label>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Protected branches</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">{t('projectSettings.protectedBranches')}</label>
                 <input
                   type="text"
                   value={gitProtectedBranches}
@@ -294,19 +296,19 @@ export default function ProjectSettingsPage() {
                   placeholder="main, production"
                   className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50"
                 />
-                <p className="text-xs text-gray-500 mt-1">Comma-separated list of branches where push is blocked</p>
+                <p className="text-xs text-gray-500 mt-1">{t('projectSettings.protectedBranchesDesc')}</p>
               </div>
             </div>
           )}
 
           {/* Danger zone */}
           <div className="mt-6 bg-[#161b22] rounded-lg border border-gray-700/50 p-6">
-            <h2 className="text-sm font-medium text-gray-300 mb-3">Danger Zone</h2>
+            <h2 className="text-sm font-medium text-gray-300 mb-3">{t('projectSettings.dangerZone')}</h2>
             <button
               onClick={handleDelete}
               className="text-red-400 hover:text-red-500 text-sm transition-colors"
             >
-              Delete project
+              {t('projectSettings.deleteProject')}
             </button>
           </div>
         </div>

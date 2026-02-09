@@ -1,5 +1,6 @@
 import React from 'react';
 import { Cable } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Api } from '../../../../shared/types';
 
 interface SessionApi extends Api {
@@ -12,11 +13,13 @@ interface Props {
 }
 
 export default function ApiToggleList({ apis, onToggle }: Props) {
+  const { t } = useTranslation();
+
   if (apis.length === 0) {
     return (
       <div className="p-4 text-gray-500 text-sm">
         <Cable size={24} className="mx-auto mb-2 opacity-50" />
-        <p className="text-center">No APIs available</p>
+        <p className="text-center">{t('apis.noApisAvailable')}</p>
       </div>
     );
   }
@@ -51,17 +54,17 @@ export default function ApiToggleList({ apis, onToggle }: Props) {
   return (
     <div className="p-4">
       <h3 className="text-sm font-semibold text-gray-300 mb-3 flex items-center gap-2">
-        <Cable size={16} /> Session APIs
+        <Cable size={16} /> {t('apis.sessionApis')}
       </h3>
       {globalApis.length > 0 && (
         <div className="mb-3">
-          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">Global</p>
+          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">{t('common.global')}</p>
           <div className="space-y-1">{globalApis.map(renderApi)}</div>
         </div>
       )}
       {projectApis.length > 0 && (
         <div>
-          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">Project</p>
+          <p className="text-xs text-gray-500 mb-1.5 uppercase tracking-wide">{t('common.project')}</p>
           <div className="space-y-1">{projectApis.map(renderApi)}</div>
         </div>
       )}

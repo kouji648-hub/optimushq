@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMobileSidebar, MobileSidebarOverlay } from './MobileSidebar';
 import { useMobile } from '../../hooks/useMobile';
 import { X } from 'lucide-react';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function MainLayout({ sidebar, header, children, rightPanel }: Props) {
+  const { t } = useTranslation();
   const { sidebarOpen } = useMobileSidebar();
   const isMobile = useMobile();
   const [mobileRightPanelOpen, setMobileRightPanelOpen] = useState(false);
@@ -48,7 +50,7 @@ export default function MainLayout({ sidebar, header, children, rightPanel }: Pr
           {rightPanel && isMobile && mobileRightPanelOpen && (
             <div className="fixed inset-0 z-40 bg-[#0d1117] flex flex-col md:hidden">
               <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800/50">
-                <span className="text-sm font-medium text-gray-300">Panel</span>
+                <span className="text-sm font-medium text-gray-300">{t('common.panel')}</span>
                 <button
                   onClick={() => setMobileRightPanelOpen(false)}
                   className="p-1 text-gray-500 hover:text-gray-300 transition-colors"

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ChevronDown,
   ChevronRight,
@@ -81,6 +82,7 @@ function getWriteLineCount(input: Record<string, unknown>): number | null {
 }
 
 export default function ActivityLog({ activities }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   if (activities.length === 0) return null;
@@ -97,11 +99,11 @@ export default function ActivityLog({ activities }: Props) {
         <span className="bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded text-[11px] font-medium">
           {activities.length}
         </span>
-        <span>Steps Completed</span>
+        <span>{t('chat.stepsCompleted')}</span>
         {errorCount > 0 && (
           <span className="text-red-400 flex items-center gap-1">
             <AlertCircle size={12} />
-            {errorCount} {errorCount === 1 ? 'error' : 'errors'}
+            {errorCount} {errorCount === 1 ? t('chat.error') : t('chat.errors')}
           </span>
         )}
       </button>

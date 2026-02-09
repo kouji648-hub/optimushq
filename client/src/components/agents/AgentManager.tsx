@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
 import type { Agent } from '../../../../shared/types';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function AgentManager({ agents, onCreate, onUpdate, onDelete }: Props) {
+  const { t } = useTranslation();
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', system_prompt: '', icon: '🤖' });
@@ -36,12 +38,12 @@ export default function AgentManager({ agents, onCreate, onUpdate, onDelete }: P
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">Agents</h2>
+        <h2 className="text-xl font-bold text-white">{t('agents.title')}</h2>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm({ name: '', system_prompt: '', icon: '🤖' }); }}
           className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
         >
-          <Plus size={14} /> New Agent
+          <Plus size={14} /> {t('agents.newAgent')}
         </button>
       </div>
 
@@ -57,14 +59,14 @@ export default function AgentManager({ agents, onCreate, onUpdate, onDelete }: P
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Agent name"
+              placeholder={t('agents.agentName')}
               className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
             />
           </div>
           <textarea
             value={form.system_prompt}
             onChange={(e) => setForm({ ...form, system_prompt: e.target.value })}
-            placeholder="System prompt..."
+            placeholder={t('agents.systemPrompt')}
             rows={4}
             className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50 resize-none mb-3"
           />
@@ -73,13 +75,13 @@ export default function AgentManager({ agents, onCreate, onUpdate, onDelete }: P
               onClick={editingId ? handleUpdate : handleCreate}
               className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
             >
-              <Save size={14} /> {editingId ? 'Update' : 'Create'}
+              <Save size={14} /> {editingId ? t('common.update') : t('common.create')}
             </button>
             <button
               onClick={() => { setShowCreate(false); setEditingId(null); }}
               className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300"
             >
-              <X size={14} /> Cancel
+              <X size={14} /> {t('common.cancel')}
             </button>
           </div>
         </div>
@@ -92,7 +94,7 @@ export default function AgentManager({ agents, onCreate, onUpdate, onDelete }: P
               <div className="flex items-center gap-2">
                 <span className="text-lg">{a.icon}</span>
                 <span className="font-medium text-white">{a.name}</span>
-                {a.is_default ? <span className="text-xs bg-accent-600/30 text-accent-400 px-1.5 py-0.5 rounded">default</span> : null}
+                {a.is_default ? <span className="text-xs bg-accent-600/30 text-accent-400 px-1.5 py-0.5 rounded">{t('common.default')}</span> : null}
               </div>
               <p className="text-xs text-gray-400 mt-1 line-clamp-2">{a.system_prompt}</p>
             </div>

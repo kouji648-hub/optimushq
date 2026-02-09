@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, Save, X, Globe, FolderOpen, Loader, Sparkles } from 'lucide-react';
 import { api } from '../../api/http';
 import type { Api, Project } from '../../../../shared/types';
@@ -22,15 +23,6 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-const AUTH_TYPES = [
-  { value: 'none', label: 'No auth' },
-  { value: 'bearer', label: 'Bearer token' },
-  { value: 'header', label: 'Custom header' },
-  { value: 'query', label: 'Query param' },
-  { value: 'basic', label: 'Basic auth' },
-];
-
-
 interface FormState {
   name: string;
   description: string;
@@ -49,6 +41,16 @@ const emptyForm: FormState = {
 };
 
 export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props) {
+  const { t } = useTranslation();
+
+  const AUTH_TYPES = [
+    { value: 'none', label: t('apis.noAuth') },
+    { value: 'bearer', label: t('apis.bearerToken') },
+    { value: 'header', label: t('apis.customHeader') },
+    { value: 'query', label: t('apis.queryParam') },
+    { value: 'basic', label: t('apis.basicAuth') },
+  ];
+
   const [showCreate, setShowCreate] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [generateInput, setGenerateInput] = useState('');
@@ -157,7 +159,7 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
 
   const renderProjectPicker = (selectedIds: string[], onChange: (ids: string[]) => void) => (
     <div className="mt-2">
-      <label className="block text-xs text-gray-500 mb-1.5">Assign to projects</label>
+      <label className="block text-xs text-gray-500 mb-1.5">{t('skills.assignToProjects')}</label>
       <div className="flex flex-wrap gap-1.5">
         {realProjects.map(p => {
           const selected = selectedIds.includes(p.id);
@@ -178,7 +180,7 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
         })}
       </div>
       {realProjects.length === 0 && (
-        <p className="text-xs text-gray-600 mt-1">No projects available</p>
+        <p className="text-xs text-gray-600 mt-1">{t('skills.noProjectsAvailable')}</p>
       )}
     </div>
   );
@@ -286,12 +288,12 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">APIs</h2>
+        <h2 className="text-xl font-bold text-white">{t('apis.title')}</h2>
         <button
           onClick={() => { setShowCreate(true); setEditingId(null); setForm({ ...emptyForm }); setGenerateInput(''); setGenerateError(''); }}
           className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
         >
-          <Plus size={14} /> New API
+          <Plus size={14} /> {t('apis.newApi')}
         </button>
       </div>
 
@@ -300,9 +302,9 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
           {/* Generate step -- only for new APIs, before form is filled */}
           {showCreate && !isFormFilled && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-300 mb-2">What API do you want to add?</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">{t('apis.whatApi')}</label>
               <p className="text-xs text-gray-500 mb-3">
-                Describe the API or paste a URL to its documentation. Claude will generate the configuration for you.
+                {t('apis.apiDesc')}
               </p>
               <textarea
                 value={generateInput}
@@ -321,10 +323,10 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 disabled:opacity-50 rounded text-sm text-white"
                 >
                   {generating ? <Loader size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                  {generating ? 'Generating...' : 'Generate'}
+                  {generating ? t('apis.generating') : t('apis.generate')}
                 </button>
                 <button onClick={closeForm} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300">
-                  <X size={14} /> Cancel
+                  <X size={14} /> {t('common.cancel')}
                 </button>
               </div>
             </div>
@@ -342,24 +344,24 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="API name"
+              placeholder={t('apis.apiName')}
               className="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent-500/50"
             />
           </div>
           <input
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
-            placeholder="Description"
+            placeholder={t('common.description')}
             className={`${inputCls} mb-3`}
           />
           <input
             value={form.base_url}
             onChange={(e) => setForm({ ...form, base_url: e.target.value })}
-            placeholder="Base URL (e.g. https://api.example.com/v1)"
+            placeholder={t('apis.baseUrl')}
             className={`${inputCls} mb-3`}
           />
           <div className="mb-3">
-            <label className="block text-xs text-gray-500 mb-1.5">Authentication</label>
+            <label className="block text-xs text-gray-500 mb-1.5">{t('apis.authentication')}</label>
             <select
               value={form.auth_type}
               onChange={(e) => setForm({ ...form, auth_type: e.target.value, auth_config: {} })}
@@ -373,7 +375,7 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
           </div>
           <div className="mb-3">
             <label className="block text-xs text-gray-500 mb-1.5">
-              API spec / docs
+              {t('apis.apiSpec')}
             </label>
             <textarea
               value={form.spec}
@@ -389,8 +391,8 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
               onChange={(e) => setForm({ ...form, scope: e.target.value })}
               className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500/50"
             >
-              <option value="global">Global scope</option>
-              <option value="project">Project scope</option>
+              <option value="global">{t('skills.globalScope')}</option>
+              <option value="project">{t('skills.projectScope')}</option>
             </select>
             {form.scope === 'project' && renderProjectPicker(form.projectIds, (ids) => setForm({ ...form, projectIds: ids }))}
           </div>
@@ -399,10 +401,10 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
               onClick={editingId ? handleUpdate : handleCreate}
               className="flex items-center gap-1 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 rounded text-sm text-white"
             >
-              <Save size={14} /> {editingId ? 'Update' : 'Create'}
+              <Save size={14} /> {editingId ? t('common.update') : t('common.create')}
             </button>
             <button onClick={closeForm} className="flex items-center gap-1 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-sm text-gray-300">
-              <X size={14} /> Cancel
+              <X size={14} /> {t('common.cancel')}
             </button>
           </div>
           </>)}
@@ -412,7 +414,7 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
       {globalApis.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-            <Globe size={14} /> Global APIs
+            <Globe size={14} /> {t('apis.globalApis')}
           </h3>
           <div className="space-y-3">
             {globalApis.map(renderApiCard)}
@@ -423,7 +425,7 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
       {projectApis.length > 0 && (
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-            <FolderOpen size={14} /> Project APIs
+            <FolderOpen size={14} /> {t('apis.projectApis')}
           </h3>
           <div className="space-y-3">
             {projectApis.map(renderApiCard)}
@@ -433,8 +435,8 @@ export default function ApiManager({ apis, onCreate, onUpdate, onDelete }: Props
 
       {apis.length === 0 && !showCreate && (
         <div className="text-center py-12 text-gray-500">
-          <p className="text-lg mb-2">No APIs yet</p>
-          <p className="text-sm">Register an external API to make it available to your agents</p>
+          <p className="text-lg mb-2">{t('apis.noApis')}</p>
+          <p className="text-sm">{t('apis.registerApi')}</p>
         </div>
       )}
     </div>
